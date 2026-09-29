@@ -1029,3 +1029,134 @@ tr:last-child td{border-bottom:0}
   .foodie-category-image{width:78px;height:78px}
   .foodie-category-card>b{margin-top:82px}
 }
+
+
+/* Typography calibration to the Foodieland reference */
+.foodie-page{
+  font-family:"Poppins",sans-serif;
+  font-weight:400;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+.foodie-brand{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:16px;
+  font-weight:700;
+  letter-spacing:-.045em;
+}
+.foodie-nav button,.foodie-login,.foodie-footer-nav button{
+  font-family:"Poppins",sans-serif;
+  font-size:10px;
+  line-height:1;
+  font-weight:500;
+  letter-spacing:-.01em;
+}
+.foodie-black-btn,.foodie-outline-btn,.foodie-hot-pill{
+  font-family:"Poppins",sans-serif;
+  font-size:9px;
+  line-height:1;
+  font-weight:700;
+  letter-spacing:-.01em;
+}
+.foodie-hero-copy h1{
+  font-family:"Poppins",sans-serif;
+  font-size:52px;
+  line-height:1.02;
+  letter-spacing:-.065em;
+  font-weight:700;
+  margin-top:17px;
+}
+.foodie-hero-copy p{
+  font-family:"Poppins",sans-serif;
+  font-size:10px;
+  line-height:1.72;
+  font-weight:400;
+  letter-spacing:0;
+}
+.foodie-meta-row span{
+  font-size:8px;
+  font-weight:500;
+}
+.foodie-author b{
+  font-size:8px;
+  font-weight:700;
+}
+.foodie-author span{
+  font-size:7px;
+  font-weight:400;
+}
+.foodie-section-head h2,.foodie-centered-head h2{
+  font-family:"Poppins",sans-serif;
+  font-size:31px;
+  line-height:1.08;
+  letter-spacing:-.055em;
+  font-weight:700;
+}
+.foodie-centered-head p{
+  font-family:"Poppins",sans-serif;
+  font-size:9px;
+  line-height:1.7;
+  font-weight:400;
+}
+.foodie-category-card>b{
+  font-family:"Poppins",sans-serif;
+  font-size:9px;
+  line-height:1;
+  font-weight:600;
+  letter-spacing:-.02em;
+}
+.foodie-recipe-card h3{
+  font-family:"Poppins",sans-serif;
+  font-size:14px;
+  line-height:1.28;
+  letter-spacing:-.035em;
+  font-weight:600;
+}
+.foodie-recipe-card p{
+  font-family:"Poppins",sans-serif;
+  font-size:8px;
+  line-height:1.55;
+  font-weight:400;
+}
+.foodie-recipe-info{
+  font-family:"Poppins",sans-serif;
+  font-size:7px;
+  font-weight:500;
+}
+.foodie-chef-copy h2{
+  font-family:"Poppins",sans-serif;
+  font-size:44px;
+  line-height:1.01;
+  letter-spacing:-.065em;
+  font-weight:700;
+}
+.foodie-chef-copy p{
+  font-family:"Poppins",sans-serif;
+  font-size:10px;
+  line-height:1.75;
+  font-weight:400;
+}
+.foodie-newsletter h2{
+  font-family:"Poppins",sans-serif;
+  font-size:38px;
+  line-height:1.02;
+  letter-spacing:-.065em;
+  font-weight:700;
+}
+.foodie-newsletter p,.foodie-newsletter-form input{
+  font-family:"Poppins",sans-serif;
+}
+.foodie-newsletter p{
+  font-size:9px;
+  line-height:1.65;
+}
+@media(max-width:720px){
+  .foodie-hero-copy h1{font-size:42px;letter-spacing:-.06em}
+  .foodie-section-head h2,.foodie-centered-head h2{font-size:28px}
+  .foodie-chef-copy h2{font-size:38px}
+  .foodie-newsletter h2{font-size:32px}
+}
+@media(max-width:430px){
+  .foodie-hero-copy h1{font-size:37px}
+  .foodie-section-head h2,.foodie-centered-head h2{font-size:26px}
+}
