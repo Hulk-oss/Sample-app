@@ -26,6 +26,7 @@ function publicUser(user) {
     onboardingComplete: user.onboardingComplete,
     role: user.role,
     companyId: user.companyId,
+    plan: user.plan,
   };
 }
 
@@ -53,8 +54,9 @@ router.post("/signup", async (req, res) => {
     name: data.name,
     email: data.email.toLowerCase(),
     passwordHash,
-    role: "user",
+    role: env.platformOwnerEmail && data.email.toLowerCase() === env.platformOwnerEmail ? "platform_owner" : "user",
     companyId,
+    plan: data.plan,
   });
 
   if (invite) {
@@ -69,6 +71,10 @@ router.post("/login", async (req, res) => {
   const data = parse(loginSchema, req.body);
   const user = await User.findOne({ email: data.email.toLowerCase() });
   if (!user || !(await bcrypt.compare(data.password, user.passwordHash))) throw unauthorized("Email or password is incorrect");
+  if (env.platformOwnerEmail && user.email === env.platformOwnerEmail && user.role !== "platform_owner") {
+    user.role = "platform_owner";
+    await user.save();
+  }
   res.json({ token: issueToken(user), user: publicUser(user) });
 });
 
@@ -78,17 +84,21 @@ router.post("/company-signup", async (req, res) => {
   if (exists) throw validation("An account with that email already exists.");
 
   const passwordHash = await bcrypt.hash(data.password, 12);
+  const companySeatLimits = { starter: 5, growth: 25, scale: 100 };
   const user = await User.create({
     name: data.name,
     email: data.email.toLowerCase(),
     passwordHash,
-    role: "company_admin",
+    role: env.platformOwnerEmail && data.email.toLowerCase() === env.platformOwnerEmail ? "platform_owner" : "company_admin",
     onboardingComplete: true,
+    plan: "free",
   });
 
   const company = await Company.create({
     name: data.companyName,
     ownerUserId: user._id,
+    plan: data.plan,
+    seatLimit: companySeatLimits[data.plan],
   });
 
   user.companyId = company._id;
