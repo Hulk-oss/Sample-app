@@ -1,29 +1,70 @@
 # Database Model
 
-The MVP uses browser memory. A production database can use these entities.
+MongoDB is the persistence layer. Each user's financial data is isolated by userId.
 
 ## User
 
-id, name, email, profession, passwordHash, createdAt
+User stores identity and authentication state.
+
+- name
+- email
+- passwordHash
+- profession
+- onboardingComplete
+- resetPasswordTokenHash
+- resetPasswordExpiresAt
+- timestamps
 
 ## FinancialProfile
 
-userId, monthlyIncomeGoal, taxReserveRate, emergencyReserveTarget, createdAt, updatedAt
+FinancialProfile is created during onboarding and contains only the signed-in user's assumptions.
+
+- userId
+- monthlyIncomeGoal
+- monthlyExpensesBaseline
+- taxReserveRate
+- emergencyReserveTarget
+- openingCashBalance
+- taxReservedAmount
+- relevantTaxIncomeBase
+- timestamps
+
+No preset financial values are inserted for new accounts.
 
 ## Transaction
 
-id, userId, date, description, client, category, type, amount, createdAt, updatedAt
+- userId
+- date
+- description
+- client
+- category
+- type: Income | Expense
+- amount
+- timestamps
 
 ## Invoice
 
-id, userId, client, invoiceNumber, amount, issueDate, dueDate, status, createdAt, updatedAt
-
-## FinanceSnapshot
-
-userId, cashBalance, taxReserve, upcomingExpenses, emergencyReserve, safeToSpend, runwayMonths, calculatedAt
+- userId
+- invoiceNumber
+- client
+- amount
+- issueDate
+- dueDate
+- status: Paid | Due | Overdue
+- paidAt
+- timestamps
 
 ## AIConversation
 
-id, userId, question, calculationContext, response, estimated, createdAt
+- userId
+- question
+- calculationContext
+- response
+- estimated
+- timestamps
 
-Critical financial values should be derived from authoritative records rather than trusted from client-submitted values.
+## Source-of-truth rule
+
+The client never supplies trusted totals. The server derives safe-to-spend, runway, tax reserve, receivables, and cash-flow values from persisted records and the user's explicit assumptions.
+
+Every financial query is scoped to the authenticated user's userId.
