@@ -51,6 +51,13 @@ export const api = {
   async me() {
     return request("/api/auth/me");
   },
+  async onboarding(values) {
+    const data = await request("/api/auth/onboarding", {
+      method: "POST",
+      body: JSON.stringify(values),
+    });
+    return data;
+  },
   async forgotPassword(email) {
     return request("/api/auth/forgot-password", {
       method: "POST",
