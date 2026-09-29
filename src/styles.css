@@ -1192,3 +1192,114 @@ tr:last-child td{border-bottom:0}
 .foodie-newsletter h2{font-size:39px;line-height:1.02}
 .foodie-recipe-card h3{font-family:"Inter Tight","Inter",Arial,sans-serif;font-weight:600;letter-spacing:-.03em}
 .foodie-category-card>b{font-family:"Inter",Arial,sans-serif;font-weight:600}
+
+
+/* Readability + interaction pass */
+.foodie-page{
+  --motion:cubic-bezier(.22,1,.36,1);
+}
+.foodie-nav button,.foodie-login,.foodie-social,.foodie-black-btn,.foodie-outline-btn,
+.foodie-category-card,.foodie-recipe-card,.foodie-recipe-image,.foodie-instagram-tile{
+  transition:transform .28s var(--motion),box-shadow .28s var(--motion),background-color .28s ease,color .28s ease,opacity .28s ease;
+}
+.foodie-nav button:hover{transform:translateY(-1px)}
+.foodie-social:hover,.foodie-login:hover{transform:translateY(-2px)}
+.foodie-black-btn:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(17,17,17,.14)}
+.foodie-outline-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(23,23,23,.07);background:#e0f5f7}
+.foodie-reveal{
+  opacity:0;
+  transform:translateY(28px);
+  transition:opacity .75s var(--motion),transform .75s var(--motion);
+}
+.foodie-reveal.is-visible{opacity:1;transform:translateY(0)}
+.foodie-reveal-item{
+  opacity:0;
+  transform:translateY(18px) scale(.985);
+  animation:none;
+}
+.foodie-reveal.is-visible .foodie-reveal-item{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  transition:opacity .6s var(--motion),transform .6s var(--motion),box-shadow .28s var(--motion);
+}
+.foodie-reveal.is-visible .foodie-reveal-item:nth-child(1){transition-delay:.03s}
+.foodie-reveal.is-visible .foodie-reveal-item:nth-child(2){transition-delay:.08s}
+.foodie-reveal.is-visible .foodie-reveal-item:nth-child(3){transition-delay:.13s}
+.foodie-reveal.is-visible .foodie-reveal-item:nth-child(4){transition-delay:.18s}
+.foodie-reveal.is-visible .foodie-reveal-item:nth-child(5){transition-delay:.23s}
+.foodie-reveal.is-visible .foodie-reveal-item:nth-child(6){transition-delay:.28s}
+.foodie-reveal.is-visible .foodie-reveal-item:nth-child(7){transition-delay:.33s}
+.foodie-reveal.is-visible .foodie-reveal-item:nth-child(8){transition-delay:.38s}
+.foodie-reveal.is-visible .foodie-reveal-item:nth-child(9){transition-delay:.43s}
+
+.foodie-hero-copy h1{
+  font-size:clamp(46px,5.2vw,66px);
+  line-height:.98;
+  letter-spacing:-.07em;
+}
+.foodie-hero-copy p{
+  font-size:12px;
+  line-height:1.78;
+  max-width:520px;
+}
+.foodie-nav button,.foodie-login{font-size:12px}
+.foodie-black-btn,.foodie-outline-btn{font-size:11px}
+.foodie-hot-pill{font-size:10px}
+.foodie-meta-row span{font-size:10px;padding:7px 10px}
+.foodie-author b{font-size:10px}.foodie-author span{font-size:8px}
+.foodie-section-head h2,.foodie-centered-head h2{font-size:38px}
+.foodie-centered-head p{font-size:11px}
+.foodie-category-card>b{font-size:11px}
+.foodie-recipe-card h3{font-size:16px}
+.foodie-recipe-card p{font-size:10px;line-height:1.6}
+.foodie-recipe-info{font-size:9px}
+.foodie-chef-copy h2{font-size:50px}
+.foodie-chef-copy p{font-size:12px;line-height:1.75}
+.foodie-newsletter h2{font-size:42px}
+.foodie-newsletter p{font-size:10px}
+.foodie-footer-nav button{font-size:10px}
+.foodie-footer>div:first-child p{font-size:9px}
+.foodie-footer-bottom{font-size:8px}
+
+.foodie-hero-photo img,.foodie-category-image img,.foodie-chef-photo>img,.foodie-recipe-image img,.foodie-instagram-tile>img{
+  transition:transform .65s var(--motion),filter .4s ease;
+}
+.foodie-hero-photo:hover img{transform:scale(1.035)}
+.foodie-category-card:hover{transform:translateY(-7px);box-shadow:0 18px 36px rgba(25,25,25,.10)}
+.foodie-category-card:hover .foodie-category-image img{transform:scale(1.08)}
+.foodie-category-card:hover .foodie-category-icon{transform:rotate(-7deg) scale(1.05)}
+.foodie-category-icon{transition:transform .3s var(--motion)}
+.foodie-recipe-card:hover{transform:translateY(-6px)}
+.foodie-recipe-card:hover .foodie-recipe-image{box-shadow:0 16px 32px rgba(25,25,25,.11)}
+.foodie-recipe-image:hover img,.foodie-instagram-tile:hover img{transform:scale(1.06)}
+.foodie-chef-photo:hover img{transform:scale(1.035)}
+.foodie-instagram-tile:hover{transform:translateY(-5px);box-shadow:0 14px 28px rgba(25,25,25,.11)}
+.foodie-photo-stamp{animation:foodie-float 5s ease-in-out infinite}
+.foodie-overlay-card{transition:transform .35s var(--motion),box-shadow .35s var(--motion)}
+.foodie-overlay-card.one:hover{transform:translateY(-5px) rotate(-1deg);box-shadow:0 18px 35px rgba(0,0,0,.13)}
+.foodie-overlay-card.two:hover{transform:translateY(-5px) rotate(1deg);box-shadow:0 18px 35px rgba(0,0,0,.13)}
+.foodie-newsletter-form:focus-within{box-shadow:0 0 0 4px rgba(24,24,24,.06)}
+.foodie-newsletter-form input:focus::placeholder{opacity:.4}
+@keyframes foodie-float{
+  0%,100%{transform:rotate(-13deg) translateY(0)}
+  50%{transform:rotate(-10deg) translateY(-7px)}
+}
+@media(max-width:720px){
+  .foodie-hero-copy h1{font-size:46px}
+  .foodie-hero-copy p{font-size:11px}
+  .foodie-section-head h2,.foodie-centered-head h2{font-size:31px}
+  .foodie-recipe-card h3{font-size:14px}
+  .foodie-chef-copy h2{font-size:42px}
+  .foodie-newsletter h2{font-size:36px}
+}
+@media(max-width:430px){
+  .foodie-hero-copy h1{font-size:40px}
+  .foodie-section-head h2,.foodie-centered-head h2{font-size:28px}
+  .foodie-recipe-card h3{font-size:13px}
+  .foodie-recipe-card p{font-size:9px}
+  .foodie-chef-copy h2{font-size:36px}
+}
+@media(prefers-reduced-motion:reduce){
+  .foodie-page *,.foodie-page *:before,.foodie-page *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .foodie-reveal,.foodie-reveal-item{opacity:1!important;transform:none!important}
+}
