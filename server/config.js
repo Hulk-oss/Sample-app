@@ -8,7 +8,7 @@ export const env = {
   mongoUri: process.env.MONGODB_URI || (isProduction ? "" : "mongodb://127.0.0.1:27017/freelancer_cfo"),
   jwtSecret: process.env.JWT_SECRET || (isProduction ? "" : "change-me-in-production"),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
-  clientOrigin: process.env.CLIENT_ORIGIN || "*",
+  clientOrigin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
   platformOwnerEmail: (process.env.PLATFORM_OWNER_EMAIL || "").trim().toLowerCase(),
 };
 
