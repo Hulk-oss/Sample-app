@@ -10,6 +10,7 @@ import transactionRoutes from "./routes/transactions.js";
 import invoiceRoutes from "./routes/invoices.js";
 import financeRoutes from "./routes/finance.js";
 import aiRoutes from "./routes/ai.js";
+import companyRoutes from "./routes/company.js";
 import { errorHandler, notFoundHandler } from "./middleware/error.js";
 
 const app = express();
@@ -34,6 +35,7 @@ app.use("/api/transactions", transactionRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api", financeRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/company", companyRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
