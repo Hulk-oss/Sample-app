@@ -8,6 +8,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { requirePlatformOwner } from "../middleware/owner.js";
 import { notFound } from "../utils/errors.js";
 import { calculateDashboard } from "../finance/engine.js";
+import AdminAudit from "../models/AdminAudit.js";
 
 const router = express.Router();
 router.use(requireAuth, requirePlatformOwner);
@@ -56,6 +57,13 @@ router.get("/companies", async (req, res) => {
 });
 
 router.get("/users/:id/finance", async (req, res) => {
+  await AdminAudit.create({
+    actorUserId: req.user._id,
+    action: "inspect_user_finance",
+    targetType: "user",
+    targetId: req.params.id,
+  });
+
   const user = await User.findById(req.params.id)
     .select("_id name email role plan profession companyId onboardingComplete createdAt updatedAt")
     .lean();
@@ -82,6 +90,13 @@ router.get("/users/:id/finance", async (req, res) => {
 });
 
 router.get("/companies/:id/members", async (req, res) => {
+  await AdminAudit.create({
+    actorUserId: req.user._id,
+    action: "inspect_company_members",
+    targetType: "company",
+    targetId: req.params.id,
+  });
+
   const company = await Company.findById(req.params.id).lean();
   if (!company) throw notFound("Company not found");
 
@@ -91,6 +106,14 @@ router.get("/companies/:id/members", async (req, res) => {
     .lean();
 
   res.json({ company, members });
+});
+
+router.get("/audit", async (req, res) => {
+  const events = await AdminAudit.find({})
+    .sort({ createdAt: -1 })
+    .limit(100)
+    .lean();
+  res.json({ events });
 });
 
 export default router;
