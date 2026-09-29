@@ -33,8 +33,8 @@ async function request(path, options = {}, token = localStorage.getItem("cfo_tok
 }
 
 export const api = {
-  async companySignup(companyName, name, email, password) {
-    const data = await request("/api/auth/company-signup", { method: "POST", body: JSON.stringify({ companyName, name, email, password }) }, null);
+  async companySignup(companyName, name, email, password, plan = "starter") {
+    const data = await request("/api/auth/company-signup", { method: "POST", body: JSON.stringify({ companyName, name, email, password, plan }) }, null);
     localStorage.setItem("cfo_token", data.token);
     return data;
   },
@@ -43,8 +43,8 @@ export const api = {
     localStorage.setItem("cfo_token", data.token);
     return data;
   },
-  async signup(name, email, password, inviteToken) {
-    const data = await request("/api/auth/signup", { method: "POST", body: JSON.stringify({ name, email, password, ...(inviteToken ? { inviteToken } : {}) }) }, null);
+  async signup(name, email, password, inviteToken, plan = "free") {
+    const data = await request("/api/auth/signup", { method: "POST", body: JSON.stringify({ name, email, password, plan, ...(inviteToken ? { inviteToken } : {}) }) }, null);
     localStorage.setItem("cfo_token", data.token);
     return data;
   },
