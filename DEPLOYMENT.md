@@ -1,40 +1,53 @@
 # Deployment
 
-## Static MVP
+## Full-stack Vercel deployment
 
-Build the frontend:
+The repository contains both sides of the SaaS:
 
-```bash
-npm ci
-npm run build
-```
+    Vercel
+    ├── Vite frontend
+    └── /api/[...path].js -> Express + MongoDB
 
-Deploy `dist` to a static host such as [Vercel](https://vercel.com/), [Netlify](https://www.netlify.com/), or [Cloudflare Pages](https://pages.cloudflare.com/).
+The Express app is separated into:
 
-## Production architecture
+- server/app.js: reusable Express application
+- server/index.js: local development server
+- api/[...path].js: Vercel serverless entrypoint
 
-```mermaid
-flowchart LR
- B[Browser] --> CDN[CDN / Edge]
- CDN --> W[React app]
- W --> API[Authenticated API]
- API --> DB[(Database)]
- API --> F[Finance engine]
- API --> AI[AI gateway]
- F --> DB
- AI --> F
-```
+## Required Vercel environment variables
 
-Never place production database credentials or AI provider secrets in frontend code.
+    MONGODB_URI=your-mongodb-atlas-connection-string
+    JWT_SECRET=long-random-production-secret
+    JWT_EXPIRES_IN=7d
+    CLIENT_ORIGIN=https://your-production-domain.vercel.app
+
+Do not commit .env.
+
+## Local full stack
+
+    npm install
+    npm run dev:full
+
+Frontend: http://localhost:5173
+
+API: http://localhost:5000
+
+Vite proxies /api to the local Express server.
+
+## Production
+
+    npm install
+    npm run build
+
+Vercel uses vercel.json, builds the frontend into dist, and exposes the API catch-all function under /api/*.
 
 ## Security checklist
 
-- HTTPS
-- Secure session handling
-- Password hashing
-- Server-side authorization
-- Rate limiting
-- Input validation
-- Financial mutation audit logs
-- Secret management
-- No sensitive financial data in browser logs
+- Use a long random JWT_SECRET.
+- Use MongoDB Atlas with restricted network access.
+- Keep MONGODB_URI and JWT secrets out of client code.
+- Keep company admin and user routes role-protected.
+- Keep financial queries scoped to userId.
+- Keep company queries scoped to companyId.
+- Use HTTPS in production.
+- Review rate limits and authentication logs before public launch.
