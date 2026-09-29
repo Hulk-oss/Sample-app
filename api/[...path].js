@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import app from "../server/app.js";
-import { env } from "../server/config.js";
+import { env, validateProductionConfig } from "../server/config.js";
 
 let connectionPromise;
 
@@ -20,6 +20,7 @@ async function connectDatabase() {
 
 export default async function handler(req, res) {
   try {
+    validateProductionConfig();
     await connectDatabase();
     return app(req, res);
   } catch (error) {
@@ -27,7 +28,9 @@ export default async function handler(req, res) {
     return res.status(503).json({
       error: {
         code: "SERVICE_UNAVAILABLE",
-        message: "The backend is not connected to the database. Check the production MONGODB_URI configuration.",
+        message: error?.code === "MISSING_PRODUCTION_CONFIG"
+        ? error.message
+        : "The backend is not connected to the database. Check the production MONGODB_URI configuration.",
       },
     });
   }
