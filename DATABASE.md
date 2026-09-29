@@ -1,23 +1,39 @@
 # Database Model
 
-MongoDB is the persistence layer. Each user's financial data is isolated by userId.
+MongoDB stores user, company, financial, invitation, and AI records. Financial data is isolated by user.
 
 ## User
-
-User stores identity and authentication state.
 
 - name
 - email
 - passwordHash
 - profession
+- role: user | company_admin
+- companyId: optional
 - onboardingComplete
-- resetPasswordTokenHash
-- resetPasswordExpiresAt
+- password reset fields
+- timestamps
+
+## Company
+
+- name
+- ownerUserId
+- plan
+- status
+- seatLimit
+- timestamps
+
+## CompanyInvite
+
+- companyId
+- email
+- invitedBy
+- tokenHash
+- expiresAt
+- status
 - timestamps
 
 ## FinancialProfile
-
-FinancialProfile is created during onboarding and contains only the signed-in user's assumptions.
 
 - userId
 - monthlyIncomeGoal
@@ -29,7 +45,7 @@ FinancialProfile is created during onboarding and contains only the signed-in us
 - relevantTaxIncomeBase
 - timestamps
 
-No preset financial values are inserted for new accounts.
+No customer financial values are seeded.
 
 ## Transaction
 
@@ -38,7 +54,7 @@ No preset financial values are inserted for new accounts.
 - description
 - client
 - category
-- type: Income | Expense
+- type
 - amount
 - timestamps
 
@@ -50,7 +66,7 @@ No preset financial values are inserted for new accounts.
 - amount
 - issueDate
 - dueDate
-- status: Paid | Due | Overdue
+- status
 - paidAt
 - timestamps
 
@@ -63,8 +79,10 @@ No preset financial values are inserted for new accounts.
 - estimated
 - timestamps
 
-## Source-of-truth rule
+## Isolation rules
 
-The client never supplies trusted totals. The server derives safe-to-spend, runway, tax reserve, receivables, and cash-flow values from persisted records and the user's explicit assumptions.
-
-Every financial query is scoped to the authenticated user's userId.
+- User finance routes require role=user.
+- Company routes require role=company_admin.
+- User finance queries always include authenticated userId.
+- Company queries scope by authenticated companyId.
+- Company endpoints do not expose member financial records.
