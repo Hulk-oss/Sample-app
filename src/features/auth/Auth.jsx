@@ -36,9 +36,16 @@ export default function Auth({ initialMode = "login", close, setAuth, onAuthenti
 
   async function submit(event) {
     event.preventDefault();
-    await authenticate(() => mode === "company-signup"
-      ? api.companySignup(companyName, name, email, password)
-      : api.signup(name, email, password, inviteToken || undefined));
+    const selectedPlan = localStorage.getItem(mode === "company-signup" ? "cfo_selected_company_plan" : "cfo_selected_plan")
+      || (mode === "company-signup" ? "starter" : "free");
+    await authenticate(async () => {
+      const result = mode === "company-signup"
+        ? await api.companySignup(companyName, name, email, password, selectedPlan)
+        : await api.signup(name, email, password, inviteToken || undefined, selectedPlan);
+      localStorage.removeItem("cfo_selected_plan");
+      localStorage.removeItem("cfo_selected_company_plan");
+      return result;
+    });
   }
 
   async function login() {
