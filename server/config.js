@@ -9,6 +9,7 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET || (isProduction ? "" : "change-me-in-production"),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
   clientOrigin: process.env.CLIENT_ORIGIN || "*",
+  platformOwnerEmail: (process.env.PLATFORM_OWNER_EMAIL || "").trim().toLowerCase(),
 };
 
 export function validateProductionConfig() {
