@@ -224,7 +224,7 @@ function App() {
       </button>
     )}</div>
 
-    {modal && <Reminder invoice={modal} close={() => setModal(null)} notify={notify} />}
+    {modal?.type === "transaction" && <TransactionModal close={() => setModal(null)} notify={notify} reload={loadWorkspace} />}\n    {modal?.type === "invoice" && <InvoiceModal close={() => setModal(null)} notify={notify} reload={loadWorkspace} />}\n    {modal?.type === "reminder" && <Reminder invoice={modal.invoice} close={() => setModal(null)} notify={notify} />}
     {toast && <div className="toast"><Check size={14} />{toast}</div>}
   </div>;
 }
@@ -331,10 +331,10 @@ function Invoices({ data, markPaid, setModal }) {
   const paid = data.filter(row => row.status === "Paid").reduce((a, row) => a + Number(row.amount), 0);
   const overdue = data.filter(row => row.status === "Overdue").reduce((a, row) => a + Number(row.amount), 0);
   return <div className="page">
-    <Head eyebrow="Accounts receivable" title="Invoices" text="Track the invoices that belong to your account, not shared demo records." />
+    <Head eyebrow="Accounts receivable" title="Invoices" text="Track the invoices that belong to your account." action={<Button icon={Plus} onClick={() => setModal({ type: "invoice" })}>Create invoice</Button>} />
     <div className="summary-grid"><Kpi label="Total invoiced" value={money(total)} sub={data.length + " invoices"} icon={FileText} /><Kpi label="Paid" value={money(paid)} sub="Collected" icon={Check} /><Kpi label="Outstanding" value={money(total - paid)} sub="Awaiting payment" icon={Wallet} /></div>
     <section className="card"><div className="section-head"><div><h3>Invoice register</h3><p>Your clients and payment status</p></div><Badge tone={overdue ? "warning" : "success"}>{overdue ? money(overdue) + " overdue" : "No overdue balance"}</Badge></div>
-      {data.length ? <div className="invoice-list">{data.map(row => { const id = row._id || row.id; const invoiceNumber = row.invoiceNumber || row.id; return <div className="invoice-row" key={id}><div className="invoice-main"><span className="invoice-logo">{String(row.client).slice(0, 1).toUpperCase()}</span><div><b>{row.client}</b><small>{invoiceNumber} · Due {new Date(row.dueDate).toLocaleDateString("en-IN")}</small></div></div><strong>{money(row.amount)}</strong><Badge tone={String(row.status).toLowerCase()}>{row.status}</Badge><div className="invoice-actions"><button title="View"><FileText size={14} /></button>{row.status !== "Paid" && <button title="Mark paid" onClick={() => markPaid(id)}><Check size={14} /></button>}<button title="Reminder draft" onClick={() => setModal(row)}><MessageSquare size={14} /></button></div></div>; })}</div> : <EmptyState title="No invoices yet" text="Create your first invoice when you are ready to track receivables." />}
+      {data.length ? <div className="invoice-list">{data.map(row => { const id = row._id || row.id; const invoiceNumber = row.invoiceNumber || row.id; return <div className="invoice-row" key={id}><div className="invoice-main"><span className="invoice-logo">{String(row.client).slice(0, 1).toUpperCase()}</span><div><b>{row.client}</b><small>{invoiceNumber} · Due {new Date(row.dueDate).toLocaleDateString("en-IN")}</small></div></div><strong>{money(row.amount)}</strong><Badge tone={String(row.status).toLowerCase()}>{row.status}</Badge><div className="invoice-actions"><button title="View"><FileText size={14} /></button>{row.status !== "Paid" && <button title="Mark paid" onClick={() => markPaid(id)}><Check size={14} /></button>}<button title="Reminder draft" onClick={() => setModal({ type: "reminder", invoice: row })}><MessageSquare size={14} /></button></div></div>; })}</div> : <EmptyState title="No invoices yet" text="Create your first invoice when you are ready to track receivables." />}
     </section>
   </div>;
 }
@@ -426,6 +426,45 @@ function SettingsCard({ title, icon, children }) {
 function Toggle({ text, on: initial = false }) {
   const [on, setOn] = useState(initial);
   return <button className="toggle-row" onClick={() => setOn(!on)}><span>{text}</span><i className={on ? "on" : ""}><b /></i></button>;
+}
+
+function TransactionModal({ close, notify, reload }) {
+  const [form, setForm] = useState({ date: new Date().toISOString().slice(0,10), description: "", client: "", category: "", type: "Income", amount: "" });
+  async function save(event) {
+    event.preventDefault();
+    try {
+      await api.createTransaction({ ...form, amount: Number(form.amount) });
+      close(); await reload(); notify("Transaction added");
+    } catch (error) { notify(error.message); }
+  }
+  return <div className="modal-backdrop" onMouseDown={close}><form className="modal" onMouseDown={e => e.stopPropagation()} onSubmit={save}>
+    <div className="modal-head"><div><p className="eyebrow">Your data</p><h3>Add transaction</h3></div><button type="button" onClick={close}><X size={17} /></button></div>
+    <div className="modal-fields">
+      <label>Date<input type="date" required value={form.date} onChange={e => setForm(v => ({...v,date:e.target.value}))}/></label>
+      <label>Type<select value={form.type} onChange={e => setForm(v => ({...v,type:e.target.value}))}><option>Income</option><option>Expense</option></select></label>
+      <label>Description<input required value={form.description} onChange={e => setForm(v => ({...v,description:e.target.value}))}/></label>
+      <label>Client<input value={form.client} onChange={e => setForm(v => ({...v,client:e.target.value}))}/></label>
+      <label>Category<input required value={form.category} onChange={e => setForm(v => ({...v,category:e.target.value}))}/></label>
+      <label>Amount<input required min="0.01" type="number" step="0.01" value={form.amount} onChange={e => setForm(v => ({...v,amount:e.target.value}))}/></label>
+    </div>
+    <div className="modal-actions"><Button variant="secondary" onClick={close}>Cancel</Button><Button type="submit" icon={Check}>Save transaction</Button></div>
+  </form></div>;
+}
+
+function InvoiceModal({ close, notify, reload }) {
+  const [form, setForm] = useState({ invoiceNumber: "", client: "", amount: "", issueDate: new Date().toISOString().slice(0,10), dueDate: "" });
+  async function save(event) {
+    event.preventDefault();
+    try {
+      await fetch("/api/invoices", { method:"POST", headers:{ "Content-Type":"application/json", Authorization:"Bearer "+localStorage.getItem("cfo_token") }, body: JSON.stringify({ ...form, amount:Number(form.amount) }) }).then(async r => { const body=await r.json(); if(!r.ok) throw new Error(body?.error?.message||"Unable to create invoice"); return body; });
+      close(); await reload(); notify("Invoice created");
+    } catch (error) { notify(error.message); }
+  }
+  return <div className="modal-backdrop" onMouseDown={close}><form className="modal" onMouseDown={e => e.stopPropagation()} onSubmit={save}>
+    <div className="modal-head"><div><p className="eyebrow">Your data</p><h3>Create invoice</h3></div><button type="button" onClick={close}><X size={17}/></button></div>
+    <div className="modal-fields"><label>Invoice number<input required value={form.invoiceNumber} onChange={e=>setForm(v=>({...v,invoiceNumber:e.target.value}))}/></label><label>Client<input required value={form.client} onChange={e=>setForm(v=>({...v,client:e.target.value}))}/></label><label>Amount<input required min="0.01" type="number" step="0.01" value={form.amount} onChange={e=>setForm(v=>({...v,amount:e.target.value}))}/></label><label>Issue date<input required type="date" value={form.issueDate} onChange={e=>setForm(v=>({...v,issueDate:e.target.value}))}/></label><label>Due date<input required type="date" value={form.dueDate} onChange={e=>setForm(v=>({...v,dueDate:e.target.value}))}/></label></div>
+    <div className="modal-actions"><Button variant="secondary" onClick={close}>Cancel</Button><Button type="submit" icon={Check}>Create invoice</Button></div>
+  </form></div>;
 }
 
 function Reminder({ invoice, close, notify }) {
