@@ -140,8 +140,11 @@ router.post("/reset-password", async (req, res) => {
 });
 
 router.get("/me", requireAuth, async (req, res) => {
-  const profile = await FinancialProfile.findOne({ userId: req.user._id }).lean();
-  res.json({ user: publicUser(req.user), profile });
+  const [profile, company] = await Promise.all([
+    FinancialProfile.findOne({ userId: req.user._id }).lean(),
+    req.user.companyId ? Company.findById(req.user.companyId).select("name plan seatLimit status").lean() : null,
+  ]);
+  res.json({ user: publicUser(req.user), profile, company });
 });
 
 router.post("/onboarding", requireAuth, async (req, res) => {
