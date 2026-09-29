@@ -67,7 +67,7 @@ await FinancialProfile.findOneAndUpdate(
     monthlyExpensesBaseline: 176000,
     taxReserveRate: 0.22,
     emergencyReserveTarget: 150000,
-    openingCashBalance: 103300,
+    openingCashBalance: 13300,
     taxReservedAmount: 145000,
     relevantTaxIncomeBase: 659091,
   },
