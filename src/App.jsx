@@ -30,8 +30,8 @@ function Badge({ children, tone = "neutral" }) {
   return <span className={"badge " + tone}>{children}</span>;
 }
 
-function Button({ children, onClick, variant = "primary", icon: Icon, type = "button" }) {
-  return <button type={type} className={"button " + variant} onClick={onClick}>
+function Button({ children, onClick, variant = "primary", icon: Icon, type = "button", disabled = false }) {
+  return <button type={type} className={"button " + variant} onClick={onClick} disabled={disabled}>
     {Icon && <Icon size={14} />} {children}
   </button>;
 }
@@ -521,39 +521,54 @@ function Auth({ initialMode = "login", close, setAuth, onAuthenticated, notify }
   const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  function changeMode(nextMode) {
+    setMode(nextMode);
+    setError("");
+  }
+
+  async function authenticate(action) {
+    setBusy(true);
+    setError("");
+    try {
+      const result = await action();
+      setAuth(true);
+      await onAuthenticated?.(result.user);
+    } catch (error) {
+      const message = error?.message || "Unable to complete authentication.";
+      setError(message);
+      notify?.(message);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(event) {
     event.preventDefault();
-    try {
-      const result = mode === "company-signup"
-        ? await api.companySignup(companyName, name, email, password)
-        : await api.signup(name, email, password, inviteToken || undefined);
-      localStorage.setItem("cfo_token", result.token);
-      setAuth(true);
-      onAuthenticated();
-    } catch (error) {
-      notify(error.message);
-    }
+    await authenticate(() => mode === "company-signup"
+      ? api.companySignup(companyName, name, email, password)
+      : api.signup(name, email, password, inviteToken || undefined));
   }
 
   async function login() {
-    try {
-      const result = await api.login(email, password);
-      localStorage.setItem("cfo_token", result.token);
-      setAuth(true);
-      onAuthenticated();
-    } catch (error) {
-      notify(error.message);
-    }
+    await authenticate(() => api.login(email, password));
   }
 
   async function forgot() {
-    if (!email) return notify("Enter your email first");
+    if (!email) return setError("Enter your email first.");
+    setBusy(true);
+    setError("");
     try {
       await api.forgotPassword(email);
-      notify("If the account exists, the reset flow has been started");
+      notify("If the account exists, a reset token has been created.");
     } catch (error) {
-      notify(error.message);
+      const message = error?.message || "Unable to start password reset.";
+      setError(message);
+      notify(message);
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -569,23 +584,26 @@ function Auth({ initialMode = "login", close, setAuth, onAuthenticated, notify }
       <div className="auth-modal-top"><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div>{close && <button type="button" className="auth-close" onClick={close}><X size={17} /></button>}</div>
       <div className="auth-title"><p className="eyebrow">{mode === "company-signup" ? "Company control center" : "Private financial workspace"}</p><h1>{title}</h1><p>{description}</p></div>
 
-      {!inviteToken && <div className="auth-switch auth-mode-switch"><button type="button" className={mode !== "company-signup" ? "active" : ""} onClick={() => setMode("login")}>User</button><button type="button" className={mode === "company-signup" ? "active" : ""} onClick={() => setMode("company-signup")}>Company</button></div>}
-      {mode === "login" && <div className="auth-inline-choice"><button type="button" className="text-button" onClick={() => setMode("signup")}>Create user account</button><button type="button" className="text-button" onClick={() => setMode("company-signup")}>Create company</button></div>}
+      {!inviteToken && <div className="auth-switch auth-mode-switch"><button type="button" className={mode !== "company-signup" ? "active" : ""} onClick={() => changeMode("login")}>User</button><button type="button" className={mode === "company-signup" ? "active" : ""} onClick={() => changeMode("company-signup")}>Company</button></div>}
+      {mode === "login" && <div className="auth-inline-choice"><button type="button" className="text-button" onClick={() => changeMode("signup")}>Create user account</button><button type="button" className="text-button" onClick={() => changeMode("company-signup")}>Create company</button></div>}
+
+      {error && <div className="auth-error" role="alert"><AlertCircle size={15} /><span>{error}</span></div>}
 
       {(mode === "signup" || mode === "company-signup") && <label>Name<input value={name} onChange={e => setName(e.target.value)} required placeholder="Your name" /></label>}
       {mode === "company-signup" && <label>Company name<input value={companyName} onChange={e => setCompanyName(e.target.value)} required placeholder="Your company" /></label>}
-      <label>Email<input value={email} onChange={e => setEmail(e.target.value)} required type="email" placeholder="you@example.com" /></label>
-      <label>Password<input value={password} onChange={e => setPassword(e.target.value)} required minLength={8} type="password" placeholder="At least 8 characters" /></label>
+      <label>Email<input value={email} onChange={e => setEmail(e.target.value)} required type="email" placeholder="you@example.com" autoComplete="email" /></label>
+      <label>Password<input value={password} onChange={e => setPassword(e.target.value)} required minLength={8} type="password" placeholder="At least 8 characters" autoComplete={mode === "login" ? "current-password" : "new-password"} /></label>
 
-      <Button type="submit">{mode === "company-signup" ? "Create company" : mode === "signup" ? "Create account" : "Log in"}</Button>
-      {mode === "login" && <button type="button" className="text-button" onClick={forgot}>Forgot password?</button>}
+      <Button type="submit" disabled={busy}>{busy ? "Please wait…" : mode === "company-signup" ? "Create company" : mode === "signup" ? "Create account" : "Log in"}</Button>
+      {mode === "login" && <button type="button" className="text-button" onClick={forgot} disabled={busy}>Forgot password?</button>}
       {mode === "signup" && <p className="auth-note">New users start with an empty finance workspace. You add your own data during onboarding.</p>}
       {mode === "company-signup" && <p className="auth-note">Company admins manage seats and membership. Individual user financial data stays private to each user.</p>}
 
-      <p className="auth-switch">{mode === "company-signup" ? "Need the user portal?" : "Need the company portal?"} <button type="button" onClick={() => setMode(mode === "company-signup" ? "login" : "company-signup")}>{mode === "company-signup" ? "Sign in" : "Create company"}</button></p>
+      <p className="auth-switch">{mode === "company-signup" ? "Need the user portal?" : "Need the company portal?"} <button type="button" onClick={() => changeMode(mode === "company-signup" ? "login" : "company-signup")}>{mode === "company-signup" ? "Sign in" : "Create company"}</button></p>
     </form>
   </div>;
 }
+
 
 function Onboarding({ finish }) {
   const [step, setStep] = useState(0);
