@@ -1,28 +1,35 @@
 import { useState } from "react";
-import {
-  ArrowRight, ArrowUpRight, Check, Clock3, Heart, Instagram, Menu, Sparkles
-} from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, Clock3, Heart, Instagram, Menu, Sparkles } from "lucide-react";
 
 const webIcon = name => "https://api.iconify.design/" + name + ".svg?color=%23131312";
 
-const categories = [
-  ["mdi:cash-multiple", "Cash", "mint"],
-  ["mdi:receipt-text-outline", "Invoices", "peach"],
-  ["mdi:shield-check-outline", "Tax", "lavender"],
-  ["mdi:target", "Goals", "yellow"],
-  ["mdi:chart-line", "Runway", "blue"],
-  ["mdi:sparkles", "AI CFO", "rose"],
+const photos = {
+  hero: "https://images.pexels.com/photos/5900029/pexels-photo-5900029.jpeg?auto=compress&cs=tinysrgb&w=1500",
+  desk: "https://images.unsplash.com/photo-1735825764485-93a381fd5779?auto=format&fit=crop&w=1400&q=80",
+  notes: "https://images.pexels.com/photos/7681236/pexels-photo-7681236.jpeg?auto=compress&cs=tinysrgb&w=1200",
+  planner: "https://images.pexels.com/photos/5387247/pexels-photo-5387247.jpeg?auto=compress&cs=tinysrgb&w=1200",
+  papers: "https://images.unsplash.com/photo-1735825764485-93a381fd5779?auto=format&fit=crop&w=1100&q=80",
+};
+
+const categoryData = [
+  ["mdi:wallet-outline", "Cash", photos.desk, "mint"],
+  ["mdi:receipt-text-outline", "Invoices", photos.hero, "peach"],
+  ["mdi:shield-check-outline", "Tax Reserve", photos.notes, "lav"],
+  ["mdi:target", "Goals", photos.planner, "yellow"],
+  ["mdi:chart-line", "Runway", photos.desk, "blue"],
+  ["mdi:sparkles", "AI CFO", photos.notes, "rose"],
 ];
 
-const recipes = [
-  ["mdi:wallet-outline", "Know your cash", "30 minutes", "Cash"],
-  ["mdi:file-document-check-outline", "Keep invoices moving", "15 minutes", "Invoices"],
-  ["mdi:shield-lock-outline", "Build your tax reserve", "20 minutes", "Tax"],
-  ["mdi:chart-timeline-variant", "Understand your runway", "20 minutes", "Runway"],
-  ["mdi:target-arrow", "Set a monthly target", "10 minutes", "Goals"],
-  ["mdi:scale-balance", "Compare income and spend", "15 minutes", "Planning"],
-  ["mdi:message-text-outline", "Ask your AI CFO", "5 minutes", "AI"],
-  ["mdi:calendar-check-outline", "Plan upcoming outflows", "10 minutes", "Planning"],
+const cards = [
+  [photos.desk, "See your cash clearly", "Cash position", "Know what is available before you make the next move.", "32 min"],
+  [photos.hero, "Keep every invoice moving", "Invoices", "Create, track and follow up without a crowded finance screen.", "18 min"],
+  [photos.notes, "Protect what is not yours to spend", "Tax Reserve", "Keep tax and emergency money visible before it gets used.", "24 min"],
+  [photos.planner, "Know how long you can operate", "Runway", "Understand your current pace and what changes the picture.", "20 min"],
+  [photos.papers, "Turn activity into a plan", "Planning", "Compare what happened with what you want next month to look like.", "16 min"],
+  [photos.hero, "Ask the number a better question", "AI CFO", "Get explanations grounded in your own finance workspace.", "8 min"],
+  [photos.notes, "See upcoming outflows", "Cash Flow", "Keep the next 30 days visible without losing the bigger picture.", "14 min"],
+  [photos.planner, "Build your monthly target", "Income Goal", "Give your work a clear financial target and track it.", "12 min"],
+  [photos.desk, "Make decisions with context", "Scenarios", "Use the runway and reserve view before committing to a spend.", "10 min"],
 ];
 
 function Icon({ name, className = "" }) {
@@ -47,23 +54,21 @@ function LandingPage({ onAuth }) {
         <Brand />
         <nav className="foodie-nav">
           <button onClick={() => jump("home")}>Home</button>
-          <button onClick={() => jump("categories")}>Features</button>
+          <button onClick={() => jump("categories")}>Finance</button>
           <button onClick={() => jump("recipes")}>Planning</button>
-          <button onClick={() => jump("chef")}>About us</button>
+          <button onClick={() => jump("ai")}>AI CFO</button>
+          <button onClick={() => jump("about")}>About us</button>
         </nav>
         <div className="foodie-header-right">
           <button className="foodie-social" aria-label="Instagram"><Instagram size={14} /></button>
-          <button className="foodie-social"><Heart size={13} /></button>
+          <button className="foodie-social" aria-label="Favorites"><Heart size={13} /></button>
           <button className="foodie-login" onClick={() => onAuth("login")}>Log in</button>
           <button className="foodie-black-btn" onClick={() => onAuth("signup")}>Get started</button>
         </div>
         <button className="foodie-menu-btn" onClick={() => setMenuOpen(v => !v)} aria-label="Menu"><Menu size={18} /></button>
         {menuOpen && (
           <div className="foodie-mobile-menu">
-            <button onClick={() => jump("home")}>Home</button>
-            <button onClick={() => jump("categories")}>Features</button>
-            <button onClick={() => jump("recipes")}>Planning</button>
-            <button onClick={() => jump("chef")}>About us</button>
+            {["home", "categories", "recipes", "ai", "about"].map((id, i) => <button key={id} onClick={() => jump(id)}>{["Home", "Finance", "Planning", "AI CFO", "About us"][i]}</button>)}
             <button onClick={() => { onAuth("login"); setMenuOpen(false); }}>Log in</button>
             <button onClick={() => { onAuth("signup"); setMenuOpen(false); }}>Get started</button>
           </div>
@@ -73,39 +78,22 @@ function LandingPage({ onAuth }) {
       <main>
         <section className="foodie-hero" id="home">
           <div className="foodie-hero-copy">
-            <div className="foodie-hot-pill"><span /> Private finance</div>
-            <h1>Clear, simple money decisions <em>for your business.</em></h1>
-            <p>Freelancer CFO helps you track cash, invoices, reserves and runway in one calm workspace — built for independent professionals.</p>
+            <div className="foodie-hot-pill"><span /> PRIVATE FINANCE WORKSPACE</div>
+            <h1>Simple, clear money management <em>for independent work.</em></h1>
+            <p>Track cash, invoices, reserves and runway in one calm workspace. Built for freelancers, creators and small independent businesses.</p>
             <div className="foodie-meta-row">
-              <span><Clock3 size={13} /> Your own data</span>
-              <span><Check size={13} /> No demo numbers</span>
+              <span><Clock3 size={12} /> Your own data</span>
+              <span><Check size={12} /> No demo data</span>
             </div>
             <button className="foodie-black-btn foodie-hero-btn" onClick={() => onAuth("signup")}>Start your workspace <ArrowUpRight size={14} /></button>
             <div className="foodie-author">
               <div className="foodie-avatar">CF</div>
-              <div><b>Private by design</b><span>Financial context stays inside your account.</span></div>
+              <div><b>Built around your numbers</b><span>Every screen uses the data from your account.</span></div>
             </div>
           </div>
-
-          <div className="foodie-hero-art">
-            <div className="foodie-art-top"><span>FINANCE DASHBOARD</span><ArrowUpRight size={14} /></div>
-            <div className="foodie-art-title">Spending with clarity.</div>
-            <div className="foodie-art-grid">
-              <div className="foodie-art-main">
-                <Icon name="mdi:wallet-bifold-outline" />
-                <strong>Cash position</strong>
-                <span>Available · reserves · outflows</span>
-                <div className="foodie-spark-bars">
-                  {[45, 65, 55, 82, 72, 93, 76].map((height, i) => <i key={i} style={{ height: height + "%" }} />)}
-                </div>
-              </div>
-              <div className="foodie-art-side">
-                <div><Icon name="mdi:receipt-outline" /><b>Invoices</b><small>paid · due · overdue</small></div>
-                <div><Icon name="mdi:shield-check-outline" /><b>Reserves</b><small>tax · emergency</small></div>
-                <div><Icon name="mdi:target" /><b>Runway</b><small>current pace</small></div>
-              </div>
-            </div>
-            <div className="foodie-circle-stamp"><Sparkles size={12} /><span>YOUR DATA</span></div>
+          <div className="foodie-hero-photo">
+            <img src={photos.hero} alt="Freelancer organizing receipts and finances at a desk" />
+            <div className="foodie-photo-stamp"><Sparkles size={11} /><span>FINANCE<br />MADE CALM</span></div>
           </div>
         </section>
 
@@ -115,9 +103,10 @@ function LandingPage({ onAuth }) {
             <button className="foodie-outline-btn" onClick={() => onAuth("signup")}>View all features</button>
           </div>
           <div className="foodie-category-grid">
-            {categories.map(([icon, title, tone]) => (
+            {categoryData.map(([icon, title, image, tone]) => (
               <button className={"foodie-category-card " + tone} key={title} onClick={() => onAuth("signup")}>
-                <div className="foodie-category-blob"><Icon name={icon} /></div>
+                <span className="foodie-category-image"><img src={image} alt="" /></span>
+                <span className="foodie-category-icon"><Icon name={icon} /></span>
                 <b>{title}</b>
               </button>
             ))}
@@ -126,57 +115,56 @@ function LandingPage({ onAuth }) {
 
         <section className="foodie-section" id="recipes">
           <div className="foodie-centered-head">
-            <h2>Simple and useful planning</h2>
-            <p>Use the same calm flow for the daily money tasks that keep your independent business moving.</p>
+            <h2>Everything you need for your money</h2>
+            <p>A visual workspace for the recurring finance tasks behind an independent business.</p>
           </div>
           <div className="foodie-recipe-grid">
-            {recipes.map(([icon, title, duration, tag], index) => (
+            {cards.map(([image, title, tag, text, time], index) => (
               <article className="foodie-recipe-card" key={title}>
-                <div className={"foodie-recipe-image recipe-tone-" + ((index % 6) + 1)}>
-                  <Icon name={icon} className="foodie-recipe-icon" />
+                <button className="foodie-recipe-image" onClick={() => onAuth("signup")} aria-label={title}>
+                  <img src={image} alt="" />
                   <span className="foodie-heart"><Heart size={13} /></span>
-                  <span className="foodie-recipe-mark">{String(index + 1).padStart(2, "0")}</span>
-                </div>
+                </button>
                 <h3>{title}</h3>
-                <div className="foodie-recipe-info"><span><Clock3 size={11} /> {duration}</span><span><Icon name="mdi:tag-outline" /> {tag}</span></div>
+                <p>{text}</p>
+                <div className="foodie-recipe-info">
+                  <span><Clock3 size={10} /> {time}</span>
+                  <span><Icon name="mdi:tag-outline" /> {tag}</span>
+                </div>
               </article>
             ))}
           </div>
         </section>
 
-        <section className="foodie-chef" id="chef">
+        <section className="foodie-chef" id="about">
           <div className="foodie-chef-copy">
-            <h2>Everyone can be a CFO in their own business</h2>
-            <p>No finance degree required. Put your real numbers into a workspace that explains cash, reserves, invoices and runway in language you can use.</p>
+            <h2>Everyone can understand the money behind the work</h2>
+            <p>No finance degree required. Freelancer CFO turns your real activity into a visual picture of cash, invoices, reserves, runway and next steps.</p>
             <button className="foodie-black-btn" onClick={() => onAuth("signup")}>Learn more <ArrowRight size={14} /></button>
           </div>
-          <div className="foodie-chef-art">
-            <div className="foodie-chef-circle"><Icon name="mdi:calculator-variant-outline" /></div>
-            <div className="foodie-chef-card one"><Icon name="mdi:cash-check" /><b>Safe to spend</b><span>Know what is really available.</span></div>
-            <div className="foodie-chef-card two"><Icon name="mdi:calendar-clock" /><b>Next 30 days</b><span>See upcoming outflows.</span></div>
-            <div className="foodie-chef-card three"><Icon name="mdi:robot-outline" /><b>AI CFO</b><span>Ask for an explanation.</span></div>
+          <div className="foodie-chef-photo">
+            <img src={photos.desk} alt="Professional working through financial information" />
+            <div className="foodie-overlay-card one"><Icon name="mdi:shield-check-outline" /><b>Safe to spend</b><span>After your reserves.</span></div>
+            <div className="foodie-overlay-card two"><Icon name="mdi:chart-line" /><b>Runway</b><span>See the months ahead.</span></div>
           </div>
         </section>
 
-        <section className="foodie-section foodie-instagram">
+        <section className="foodie-section foodie-instagram" id="ai">
           <div className="foodie-centered-head">
-            <h2>See the whole picture</h2>
-            <p>One visual language across cash, invoices, planning and the next decision.</p>
+            <h2>Make the money side feel simple</h2>
+            <p>Clear screens, useful context and the same visual language from first transaction to next decision.</p>
           </div>
           <div className="foodie-instagram-grid">
             {[
-              ["mdi:wallet-outline", "Cash", "What can I safely use?"],
-              ["mdi:receipt-text-outline", "Invoices", "What is still due?"],
-              ["mdi:shield-check-outline", "Reserves", "What should stay protected?"],
-              ["mdi:chart-line", "Runway", "How long can I operate?"],
-              ["mdi:target", "Goals", "What am I building toward?"],
-              ["mdi:sparkles", "AI CFO", "What does the number mean?"],
-            ].map(([icon, title, text], i) => (
-              <div className={"foodie-instagram-tile tile-" + ((i % 6) + 1)} key={title}>
-                <Icon name={icon} className="foodie-instagram-icon" />
-                <b>{title}</b>
-                <span>{text}</span>
-              </div>
+              [photos.desk, "Cash", "Know what is available."],
+              [photos.hero, "Invoices", "Know what is due."],
+              [photos.notes, "Reserves", "Know what stays protected."],
+              [photos.planner, "Runway", "Know what comes next."],
+            ].map(([image, title, text]) => (
+              <button className="foodie-instagram-tile" key={title} onClick={() => onAuth("signup")}>
+                <img src={image} alt="" />
+                <div className="foodie-instagram-caption"><b>{title}</b><span>{text}</span></div>
+              </button>
             ))}
           </div>
           <button className="foodie-outline-btn foodie-center-btn" onClick={() => onAuth("signup")}>Open your workspace</button>
@@ -184,8 +172,8 @@ function LandingPage({ onAuth }) {
 
         <section className="foodie-newsletter">
           <div>
-            <h2>Clear numbers <br />to your inbox</h2>
-            <p>Product updates, finance tips and new tools for independent work.</p>
+            <h2>Financial clarity <br />in your inbox.</h2>
+            <p>Product updates and practical finance notes for independent professionals.</p>
           </div>
           <div className="foodie-newsletter-form">
             <input type="email" placeholder="Your email address..." aria-label="Email address" />
@@ -197,10 +185,10 @@ function LandingPage({ onAuth }) {
       <footer className="foodie-footer">
         <div><Brand /><p>Financial clarity for independent professionals.</p></div>
         <div className="foodie-footer-nav">
-          <button onClick={() => jump("categories")}>Features</button>
+          <button onClick={() => jump("categories")}>Finance</button>
           <button onClick={() => jump("recipes")}>Planning</button>
+          <button onClick={() => jump("ai")}>AI CFO</button>
           <button onClick={() => onAuth("login")}>Log in</button>
-          <button onClick={() => onAuth("signup")}>Get started</button>
         </div>
         <div className="foodie-footer-bottom"><span>© 2026 Freelancer CFO</span><span>Private by design</span></div>
       </footer>
