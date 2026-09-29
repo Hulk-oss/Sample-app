@@ -11,6 +11,7 @@ import {
 import { calculateRunway, calculateSafeToSpend, calculateTaxReserve, formatFullINR, formatINR } from "./finance";
 import { api } from "./api";
 import CompanyPortal from "./CompanyPortal";
+import LandingPage from "./LandingPage";
 
 const nav = [
   ["dashboard", "Overview", LayoutDashboard],
@@ -64,6 +65,7 @@ function App() {
   const [page, setPage] = useState("dashboard");
   const [sidebar, setSidebar] = useState(false);
   const [auth, setAuth] = useState(Boolean(localStorage.getItem("cfo_token")));
+  const [authOpen, setAuthOpen] = useState(false);
   const [onboard, setOnboard] = useState(false);
   const [user, setUser] = useState(null);
   const [finance, setFinance] = useState(null);
@@ -151,11 +153,14 @@ function App() {
     }
   }
 
-  if (!auth) return <Auth setAuth={setAuth} onAuthenticated={loadWorkspace} notify={notify} />;
+  if (!auth) return <>
+    <LandingPage onAuth={mode => setAuthOpen(mode)} />
+    {authOpen && <Auth initialMode={authOpen} close={() => setAuthOpen(false)} setAuth={setAuth} onAuthenticated={loadWorkspace} notify={notify} />}
+  </>;
   if (user?.role === "company_admin") return <CompanyPortal user={user} onLogout={logout} />;
   if (onboard || !finance) {
     if (loading && user && !onboard) {
-      return <div className="auth-shell"><div className="auth-card"><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div><p>Loading your private workspace…</p></div></div>;
+      return <div className="auth-shell landing-auth-overlay"><div className="auth-card"><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div><p>Loading your private workspace…</p></div></div>;
     }
     return <Onboarding finish={finishOnboarding} />;
   }
@@ -509,9 +514,9 @@ function Reminder({ invoice, close, notify }) {
   return <div className="modal-backdrop" onMouseDown={close}><div className="modal" onMouseDown={e => e.stopPropagation()}><div className="modal-head"><div><p className="eyebrow">Draft only</p><h3>Payment reminder</h3></div><button onClick={close}><X size={17} /></button></div><p className="modal-note">AI-generated copy for review. Nothing will be sent.</p><textarea value={text} onChange={e => setText(e.target.value)} /><div className="modal-actions"><Button variant="secondary" onClick={close}>Cancel</Button><Button icon={Check} onClick={saveDraft}>Save draft</Button></div></div></div>;
 }
 
-function Auth({ setAuth, onAuthenticated, notify }) {
+function Auth({ initialMode = "login", close, setAuth, onAuthenticated, notify }) {
   const inviteToken = new URLSearchParams(window.location.search).get("invite") || "";
-  const [mode, setMode] = useState(inviteToken ? "signup" : "login");
+  const [mode, setMode] = useState(inviteToken ? "signup" : initialMode === "company" ? "company-signup" : initialMode);
   const [name, setName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
@@ -561,7 +566,7 @@ function Auth({ setAuth, onAuthenticated, notify }) {
 
   return <div className="auth-shell">
     <form className="auth-card" onSubmit={mode === "login" ? event => { event.preventDefault(); login(); } : submit}>
-      <div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div>
+      <div className="auth-modal-top"><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div>{close && <button type="button" className="auth-close" onClick={close}><X size={17} /></button>}</div>
       <div className="auth-title"><p className="eyebrow">{mode === "company-signup" ? "Company control center" : "Private financial workspace"}</p><h1>{title}</h1><p>{description}</p></div>
 
       {!inviteToken && <div className="auth-switch auth-mode-switch"><button type="button" className={mode !== "company-signup" ? "active" : ""} onClick={() => setMode("login")}>User</button><button type="button" className={mode === "company-signup" ? "active" : ""} onClick={() => setMode("company-signup")}>Company</button></div>}
