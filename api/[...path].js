@@ -34,7 +34,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error("API startup failure:", error);
 
-    const isMissingConfig = error?.code === "MISSING_PRODUCTION_CONFIG";
+    const isMissingConfig = ["MISSING_PRODUCTION_CONFIG", "INVALID_PRODUCTION_DATABASE"].includes(error?.code);
     const isDatabaseError =
       /Mongo|Mongoose|ECONNREFUSED|ENOTFOUND|server selection|topology/i.test(
         String(error?.name || "") + " " + String(error?.message || "")
