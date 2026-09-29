@@ -1,35 +1,40 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, ArrowUpRight, Check, Clock3, Heart, Instagram, Menu, Sparkles } from "lucide-react";
 
 const webIcon = name => "https://api.iconify.design/" + name + ".svg?color=%23131312";
 
 const photos = {
-  hero: "https://images.pexels.com/photos/5900029/pexels-photo-5900029.jpeg?auto=compress&cs=tinysrgb&w=1500",
-  desk: "https://images.unsplash.com/photo-1735825764485-93a381fd5779?auto=format&fit=crop&w=1400&q=80",
-  notes: "https://images.pexels.com/photos/7681236/pexels-photo-7681236.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  planner: "https://images.pexels.com/photos/5387247/pexels-photo-5387247.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  papers: "https://images.unsplash.com/photo-1735825764485-93a381fd5779?auto=format&fit=crop&w=1100&q=80",
+  hero: "https://images.unsplash.com/photo-1758876020967-e5a80e49463a?auto=format&fit=crop&q=85&w=1800",
+  desk: "https://images.unsplash.com/photo-1635186238046-40771478f17e?auto=format&fit=crop&q=85&w=1400",
+  notes: "https://images.unsplash.com/photo-1643395274037-6f0f86878aeb?auto=format&fit=crop&q=85&w=1400",
+  planner: "https://images.unsplash.com/photo-1762341121210-6bd877d766b0?auto=format&fit=crop&q=85&w=1400",
+  papers: "https://www.stuartco.ca/data/org/23396/media/img/cache/1152x640/3527981_1152x640.jpg",
+  creative: "https://assets.mondiatechnologies.com/images/Blog/entrepreneur-working-laptop.jpeg",
+  tax: "https://sanchisasesores.com/wp-content/uploads/2025/11/Gemini_Generated_Image_xj9iurxj9iurxj9i.png",
+  plan: "https://miro.medium.com/v2/da%3Atrue/resize%3Afit%3A1200/0%2A2X3l0hm_1eGh5NWX",
+  office: "https://assets.sc.hager.com/en-tr/-/media/project/hagerdeep/turkey/hager/turkey/003-inspiration-knowledge/iak-learning/aa-doorpage/learning03_landscape.jpg?h=720&hash=1E390EC61990AB7B3D66391BEA54B222&la=en&w=1080",
+  laptop: "https://blog.soloist.ai/_next/image?q=75&url=https%3A%2F%2Fstorage.googleapis.com%2Fmoz-ocho-solo-blog.firebasestorage.app%2Fimages%2Fimported%2F1776299399195-how-to-write-a-business-plan-workspace-flatlay.jpg&w=2200"
 };
 
 const categoryData = [
   ["mdi:wallet-outline", "Cash", photos.desk, "mint"],
   ["mdi:receipt-text-outline", "Invoices", photos.hero, "peach"],
-  ["mdi:shield-check-outline", "Tax Reserve", photos.notes, "lav"],
-  ["mdi:target", "Goals", photos.planner, "yellow"],
-  ["mdi:chart-line", "Runway", photos.desk, "blue"],
-  ["mdi:sparkles", "AI CFO", photos.notes, "rose"],
+  ["mdi:shield-check-outline", "Tax Reserve", photos.tax, "lav"],
+  ["mdi:target", "Goals", photos.plan, "yellow"],
+  ["mdi:chart-line", "Runway", photos.office, "blue"],
+  ["mdi:sparkles", "AI CFO", photos.creative, "rose"],
 ];
 
 const cards = [
   [photos.desk, "See your cash clearly", "Cash position", "Know what is available before you make the next move.", "32 min"],
-  [photos.hero, "Keep every invoice moving", "Invoices", "Create, track and follow up without a crowded finance screen.", "18 min"],
-  [photos.notes, "Protect what is not yours to spend", "Tax Reserve", "Keep tax and emergency money visible before it gets used.", "24 min"],
-  [photos.planner, "Know how long you can operate", "Runway", "Understand your current pace and what changes the picture.", "20 min"],
-  [photos.papers, "Turn activity into a plan", "Planning", "Compare what happened with what you want next month to look like.", "16 min"],
-  [photos.hero, "Ask the number a better question", "AI CFO", "Get explanations grounded in your own finance workspace.", "8 min"],
-  [photos.notes, "See upcoming outflows", "Cash Flow", "Keep the next 30 days visible without losing the bigger picture.", "14 min"],
-  [photos.planner, "Build your monthly target", "Income Goal", "Give your work a clear financial target and track it.", "12 min"],
-  [photos.desk, "Make decisions with context", "Scenarios", "Use the runway and reserve view before committing to a spend.", "10 min"],
+  [photos.creative, "Keep every invoice moving", "Invoices", "Create, track and follow up without a crowded finance screen.", "18 min"],
+  [photos.tax, "Protect what is not yours to spend", "Tax Reserve", "Keep tax and emergency money visible before it gets used.", "24 min"],
+  [photos.office, "Know how long you can operate", "Runway", "Understand your current pace and what changes the picture.", "20 min"],
+  [photos.plan, "Turn activity into a plan", "Planning", "Compare what happened with what you want next month to look like.", "16 min"],
+  [photos.notes, "Ask the number a better question", "AI CFO", "Get explanations grounded in your own finance workspace.", "8 min"],
+  [photos.papers, "See upcoming outflows", "Cash Flow", "Keep the next 30 days visible without losing the bigger picture.", "14 min"],
+  [photos.laptop, "Build your monthly target", "Income Goal", "Give your work a clear financial target and track it.", "12 min"],
+  [photos.planner, "Make decisions with context", "Scenarios", "Use the runway and reserve view before committing to a spend.", "10 min"],
 ];
 
 function Icon({ name, className = "" }) {
@@ -42,6 +47,20 @@ function Brand() {
 
 function LandingPage({ onAuth }) {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const nodes = document.querySelectorAll(".foodie-reveal");
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    nodes.forEach(node => observer.observe(node));
+    return () => observer.disconnect();
+  }, []);
 
   const jump = id => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -76,7 +95,7 @@ function LandingPage({ onAuth }) {
       </header>
 
       <main>
-        <section className="foodie-hero" id="home">
+        <section className="foodie-hero foodie-reveal" id="home">
           <div className="foodie-hero-copy">
             <div className="foodie-hot-pill"><span /> HOT FINANCE</div>
             <h1>Simple financial clarity <em>for your business.</em></h1>
@@ -97,14 +116,14 @@ function LandingPage({ onAuth }) {
           </div>
         </section>
 
-        <section className="foodie-section foodie-categories" id="categories">
+        <section className="foodie-section foodie-categories foodie-reveal" id="categories">
           <div className="foodie-section-head">
             <h2>Categories</h2>
             <button className="foodie-outline-btn" onClick={() => onAuth("signup")}>View all features</button>
           </div>
           <div className="foodie-category-grid">
             {categoryData.map(([icon, title, image, tone]) => (
-              <button className={"foodie-category-card " + tone} key={title} onClick={() => onAuth("signup")}>
+              <button className={"foodie-category-card foodie-reveal-item " + tone} key={title} onClick={() => onAuth("signup")}>
                 <span className="foodie-category-image"><img src={image} alt="" /></span>
                 <span className="foodie-category-icon"><Icon name={icon} /></span>
                 <b>{title}</b>
@@ -113,14 +132,14 @@ function LandingPage({ onAuth }) {
           </div>
         </section>
 
-        <section className="foodie-section" id="recipes">
+        <section className="foodie-section foodie-reveal" id="recipes">
           <div className="foodie-centered-head">
             <h2>Simple and useful finance</h2>
             <p>Understand cash, invoices and planning with the same clean visual flow from one screen to the next.</p>
           </div>
           <div className="foodie-recipe-grid">
             {cards.map(([image, title, tag, text, time], index) => (
-              <article className="foodie-recipe-card" key={title}>
+              <article className="foodie-recipe-card foodie-reveal-item" key={title}>
                 <button className="foodie-recipe-image" onClick={() => onAuth("signup")} aria-label={title}>
                   <img src={image} alt="" />
                   <span className="foodie-heart"><Heart size={13} /></span>
@@ -136,7 +155,7 @@ function LandingPage({ onAuth }) {
           </div>
         </section>
 
-        <section className="foodie-chef" id="about">
+        <section className="foodie-chef foodie-reveal" id="about">
           <div className="foodie-chef-copy">
             <h2>Everyone can be a CFO in their own business</h2>
             <p>You do the work. Freelancer CFO turns your real numbers into a clear picture of cash, reserves, invoices and runway — so the next decision feels simpler.</p>
@@ -149,7 +168,7 @@ function LandingPage({ onAuth }) {
           </div>
         </section>
 
-        <section className="foodie-section foodie-instagram" id="ai">
+        <section className="foodie-section foodie-instagram foodie-reveal" id="ai">
           <div className="foodie-centered-head">
             <h2>Check out @freelancerCFO</h2>
             <p>Cash, invoices, reserves and runway — presented with the same calm visual rhythm throughout your workspace.</p>
@@ -161,7 +180,7 @@ function LandingPage({ onAuth }) {
               [photos.notes, "Reserves", "Know what stays protected."],
               [photos.planner, "Runway", "Know what comes next."],
             ].map(([image, title, text]) => (
-              <button className="foodie-instagram-tile" key={title} onClick={() => onAuth("signup")}>
+              <button className="foodie-instagram-tile foodie-reveal-item" key={title} onClick={() => onAuth("signup")}>
                 <img src={image} alt="" />
                 <div className="foodie-instagram-caption"><b>{title}</b><span>{text}</span></div>
               </button>
@@ -170,7 +189,7 @@ function LandingPage({ onAuth }) {
           <button className="foodie-outline-btn foodie-center-btn" onClick={() => onAuth("signup")}>Open your workspace</button>
         </section>
 
-        <section className="foodie-newsletter">
+        <section className="foodie-newsletter foodie-reveal">
           <div>
             <h2>Clarity to your <br />inbox.</h2>
             <p>Product updates, practical finance notes and new tools for independent professionals.</p>
