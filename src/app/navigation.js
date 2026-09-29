@@ -8,7 +8,6 @@ import {
   Settings,
   Bell,
   CircleHelp,
-  CreditCard,
   ShieldCheck,
   Target,
   Users,
