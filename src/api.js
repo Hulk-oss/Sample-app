@@ -13,11 +13,6 @@ async function request(path, options = {}, token = localStorage.getItem("cfo_tok
 }
 
 export const api = {
-  async demo() {
-    const data = await request("/api/auth/demo", { method: "POST" }, null);
-    localStorage.setItem("cfo_token", data.token);
-    return data;
-  },
   async login(email, password) {
     const data = await request("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }, null);
     localStorage.setItem("cfo_token", data.token);
