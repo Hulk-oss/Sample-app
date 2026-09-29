@@ -42,11 +42,13 @@ export default async function handler(req, res) {
 
     return res.status(isMissingConfig || isDatabaseError ? 503 : 500).json({
       error: {
-        code: isMissingConfig
-          ? "MISSING_PRODUCTION_CONFIG"
-          : isDatabaseError
-            ? "DATABASE_UNAVAILABLE"
-            : "API_STARTUP_FAILED",
+        code: error?.code === "INVALID_PRODUCTION_DATABASE"
+          ? "INVALID_PRODUCTION_DATABASE"
+          : isMissingConfig
+            ? "MISSING_PRODUCTION_CONFIG"
+            : isDatabaseError
+              ? "DATABASE_UNAVAILABLE"
+              : "API_STARTUP_FAILED",
         message: isMissingConfig
           ? error.message
           : isDatabaseError
