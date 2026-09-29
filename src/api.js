@@ -1,4 +1,8 @@
-const API_BASE = "";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (
+  typeof window !== "undefined" && /^(localhost|127\\.0\\.0\\.1)$/.test(window.location.hostname)
+    ? "http://localhost:5000"
+    : ""
+);
 
 async function request(path, options = {}, token = localStorage.getItem("cfo_token")) {
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
@@ -30,6 +34,39 @@ export const api = {
   },
   async me() {
     return request("/api/auth/me");
+  },
+  async forgotPassword(email) {
+    return request("/api/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }, null);
+  },
+  async resetPassword(token, password) {
+    return request("/api/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ token, password }),
+    }, null);
+  },
+  async companyOverview() {
+    return request("/api/company/overview");
+  },
+  async inviteCompanyUser(email) {
+    return request("/api/company/invites", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
+  async revokeCompanyInvite(id) {
+    return request("/api/company/invites/" + id, { method: "DELETE" });
+  },
+  async removeCompanyMember(id) {
+    return request("/api/company/members/" + id, { method: "DELETE" });
+  },
+  async updateCompanyProfile(name) {
+    return request("/api/company/profile", {
+      method: "PATCH",
+      body: JSON.stringify({ name }),
+    });
   },
   async dashboard() {
     return request("/api/dashboard");
