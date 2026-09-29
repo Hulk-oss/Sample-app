@@ -1,11 +1,12 @@
 import express from "express";
 import Invoice from "../models/Invoice.js";
 import { requireAuth } from "../middleware/auth.js";
+import { requireUserPortal } from "../middleware/user.js";
 import { parse, invoiceSchema } from "../utils/validate.js";
 import { notFound } from "../utils/errors.js";
 
 const router = express.Router();
-router.use(requireAuth);
+router.use(requireAuth, requireUserPortal);
 
 async function refreshStatuses(userId) {
   const now = new Date();
