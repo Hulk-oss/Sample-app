@@ -1,25 +1,30 @@
+import {
+  Activity,
+  Bot,
+  CreditCard,
+  LayoutDashboard,
+  Mail,
+  ReceiptText,
+  Settings,
+  ShieldCheck,
+  Target,
+  Users,
+} from "lucide-react";
+
 export const userNavigation = [
-  ["dashboard", "Overview"],
-  ["transactions", "Transactions"],
-  ["invoices", "Invoices"],
-  ["cashflow", "Cash Flow"],
-  ["tax", "Tax Reserve"],
-  ["runway", "Runway"],
-  ["ai", "AI CFO"],
-  ["settings", "Settings"],
+  ["dashboard", "Overview", LayoutDashboard],
+  ["transactions", "Transactions", CreditCard],
+  ["invoices", "Invoices", ReceiptText],
+  ["cashflow", "Cash Flow", Activity],
+  ["tax", "Tax Reserve", ShieldCheck],
+  ["runway", "Runway", Target],
+  ["ai", "AI CFO", Bot],
+  ["settings", "Settings", Settings],
 ];
 
 export const companyNavigation = [
-  ["overview", "Overview"],
-  ["team", "Team"],
-  ["invites", "Invitations"],
-  ["settings", "Company settings"],
+  ["overview", "Overview", LayoutDashboard],
+  ["team", "Team", Users],
+  ["invites", "Invitations", Mail],
+  ["settings", "Company settings", Settings],
 ];
-
-export function getUserNavigationLabel(page) {
-  return userNavigation.find(row => row[0] === page)?.[1];
-}
-
-export function getCompanyNavigationLabel(page) {
-  return companyNavigation.find(row => row[0] === page)?.[1];
-}
