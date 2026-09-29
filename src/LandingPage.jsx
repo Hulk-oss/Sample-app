@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, ArrowUpRight, Check, Clock3, Heart, Instagram, Menu, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, Clock3, Heart, Instagram, Menu, WalletCards } from "lucide-react";
 
 const webIcon = name => "https://api.iconify.design/" + name + ".svg?color=%23131312";
 
@@ -42,7 +42,7 @@ function Icon({ name, className = "" }) {
 }
 
 function Brand() {
-  return <div className="foodie-brand"><span className="foodie-brand-dot"><Sparkles size={13} /></span>Freelancer CFO</div>;
+  return <div className="foodie-brand"><span className="foodie-brand-dot"><WalletCards size={13} /></span>Freelancer CFO</div>;
 }
 
 function LandingPage({ onAuth }) {
@@ -128,7 +128,7 @@ function LandingPage({ onAuth }) {
           </div>
           <div className="foodie-hero-photo">
             <img src={photos.hero} alt="Freelancer organizing receipts and finances at a desk" />
-            <div className="foodie-photo-stamp"><Sparkles size={11} /><span>FINANCE<br />MADE CALM</span></div>
+            <div className="foodie-photo-stamp"><Check size={11} /><span>FINANCE<br />MADE CALM</span></div>
           </div>
         </section>
 
