@@ -92,7 +92,11 @@ export default function PublicPages({ page, onNavigate, onBack, onAuth }) {
           <div className="pricing-card-top"><span className="pricing-label">{plan.name}</span><strong>{plan.price}</strong><small>{plan.period}</small></div>
           <p>{plan.description}</p>
           <div className="pricing-features">{plan.features.map(feature => <span key={feature}><Check size={14} />{feature}</span>)}</div>
-          <button className="public-primary" onClick={() => { localStorage.setItem("cfo_selected_company_plan", plan.id); onAuth("company"); }}>{plan.action}</button>
+          <button className="public-primary" onClick={() => {
+            if (plan.id === "scale") return onNavigate("contact");
+            localStorage.setItem("cfo_selected_company_plan", plan.id);
+            onAuth("company");
+          }}>{plan.action}</button>
         </article>)}</div>
       </section>
     </Shell>;
