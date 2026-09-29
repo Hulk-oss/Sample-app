@@ -1875,3 +1875,57 @@ tbody tr:hover td{
     gap:10px;
   }
 }
+
+
+/* =========================================================
+   Unified project typography + authentication states
+   ========================================================= */
+*,
+*::before,
+*::after{
+  font-family:"IBM Plex Sans",Arial,sans-serif;
+}
+body,
+button,
+input,
+select,
+textarea{
+  font-family:"IBM Plex Sans",Arial,sans-serif !important;
+}
+button:disabled{
+  cursor:not-allowed;
+  opacity:.62;
+}
+.auth-card{
+  font-family:"IBM Plex Sans",Arial,sans-serif;
+}
+.auth-card h1,
+.auth-card h2,
+.auth-card h3,
+.auth-card p,
+.auth-card label,
+.auth-card button,
+.auth-card input{
+  font-family:"IBM Plex Sans",Arial,sans-serif;
+}
+.auth-error{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  margin:2px 0 4px;
+  padding:10px 12px;
+  border:1px solid #f0c9c3;
+  border-radius:11px;
+  background:#fff5f3;
+  color:#9f3b2f;
+  font-size:11px;
+  line-height:1.45;
+}
+.auth-error svg{
+  flex:0 0 auto;
+  margin-top:1px;
+}
+.auth-card .button:disabled{
+  box-shadow:none;
+  transform:none;
+}
