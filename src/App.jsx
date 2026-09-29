@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import { calculateRunway, calculateSafeToSpend, calculateTaxReserve, formatFullINR, formatINR } from "./finance";
 import { api } from "./api";
+import CompanyPortal from "./CompanyPortal";
 
 const nav = [
   ["dashboard", "Overview", LayoutDashboard],
@@ -86,6 +87,7 @@ function App() {
     try {
       const me = await api.me();
       setUser(me.user);
+      if (me.user.role === "company_admin") { setOnboard(false); return; }
       if (!me.user.onboardingComplete || !me.profile) {
         setOnboard(true);
         return;
@@ -136,23 +138,7 @@ function App() {
     setCashData([]);
   }
 
-  async function addTransaction() {
-    try {
-      const result = await api.createTransaction({
-        date: new Date().toISOString().slice(0, 10),
-        description: "New transaction",
-        client: "",
-        category: "Uncategorized",
-        type: "Expense",
-        amount: 0.01,
-      });
-      setTransactions(rows => [result.transaction, ...rows]);
-      await loadWorkspace();
-      notify("Transaction added");
-    } catch (error) {
-      notify(error.message);
-    }
-  }
+  function addTransaction() { setModal({ type: "transaction" }); }
 
   async function markPaid(id) {
     try {
@@ -166,6 +152,7 @@ function App() {
   }
 
   if (!auth) return <Auth setAuth={setAuth} onAuthenticated={loadWorkspace} notify={notify} />;
+  if (user?.role === "company_admin") return <CompanyPortal user={user} onLogout={logout} />;
   if (onboard || !finance) {
     if (loading && user && !onboard) {
       return <div className="auth-shell"><div className="auth-card"><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div><p>Loading your private workspace…</p></div></div>;
