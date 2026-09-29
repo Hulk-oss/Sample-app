@@ -375,8 +375,8 @@ function TaxReserve({ finance, reload, notify }) {
 function Runway({ finance }) {
   const available = finance.cashBalance - finance.taxReserve;
   const normal = finance.runwayMonths;
-  const income30 = calculateRunway({ availableCash: available, averageMonthlyExpenses: finance.averageMonthlyExpenses + finance.monthlyIncomeGoal * .3 });
-  const zeroIncome = calculateRunway({ availableCash: available, averageMonthlyExpenses: finance.averageMonthlyExpenses });
+  const income30 = calculateRunway(available, finance.averageMonthlyExpenses + finance.monthlyIncomeGoal * .3);
+  const zeroIncome = calculateRunway(available, finance.averageMonthlyExpenses);
   const scenarios = [["Normal income", normal, "Current expense baseline"], ["Income −30%", income30, "Conservative planning scenario"], ["Income = 0", zeroIncome, "Expenses-only view"]];
   const pct = Math.min(100, normal / 6 * 100);
   const circumference = 2 * Math.PI * 68;
