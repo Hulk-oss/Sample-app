@@ -16,6 +16,7 @@ async function getContext(userId, now = new Date()) {
     Transaction.find({ userId }).lean(),
     Invoice.find({ userId }).lean(),
   ]);
+  if (!profile) throw validation("Complete onboarding before opening financial analytics.");
   return { profile, transactions, invoices, now };
 }
 
