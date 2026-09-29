@@ -467,17 +467,30 @@ function Reminder({ invoice, close, notify }) {
 }
 
 function Auth({ setAuth, onAuthenticated, notify }) {
-  const [mode, setMode] = useState("login");
+  const inviteToken = new URLSearchParams(window.location.search).get("invite") || "";
+  const [mode, setMode] = useState(inviteToken ? "signup" : "login");
   const [name, setName] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   async function submit(event) {
     event.preventDefault();
     try {
-      const result = mode === "signup"
-        ? await api.signup(name, email, password)
-        : await api.login(email, password);
+      const result = mode === "company-signup"
+        ? await api.companySignup(companyName, name, email, password)
+        : await api.signup(name, email, password, inviteToken || undefined);
+      localStorage.setItem("cfo_token", result.token);
+      setAuth(true);
+      onAuthenticated();
+    } catch (error) {
+      notify(error.message);
+    }
+  }
+
+  async function login() {
+    try {
+      const result = await api.login(email, password);
       localStorage.setItem("cfo_token", result.token);
       setAuth(true);
       onAuthenticated();
@@ -488,11 +501,42 @@ function Auth({ setAuth, onAuthenticated, notify }) {
 
   async function forgot() {
     if (!email) return notify("Enter your email first");
-    try { await api.forgotPassword(email); notify("If the account exists, the reset flow has been started"); }
-    catch (error) { notify(error.message); }
+    try {
+      await api.forgotPassword(email);
+      notify("If the account exists, the reset flow has been started");
+    } catch (error) {
+      notify(error.message);
+    }
   }
 
-  return <div className="auth-shell"><form className="auth-card" onSubmit={submit}><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div><div className="auth-title"><p className="eyebrow">Private financial workspace</p><h1>{mode === "signup" ? "Create your CFO workspace" : "Welcome back"}</h1><p>Your data stays tied to the account you sign in with.</p></div>{mode === "signup" && <label>Name<input value={name} onChange={e => setName(e.target.value)} required placeholder="Your name" /></label>}<label>Email<input value={email} onChange={e => setEmail(e.target.value)} required type="email" placeholder="you@example.com" /></label><label>Password<input value={password} onChange={e => setPassword(e.target.value)} required minLength={8} type="password" placeholder="At least 8 characters" /></label><Button type="submit">{mode === "signup" ? "Create account" : "Log in"}</Button>{mode === "login" && <button type="button" className="text-button" onClick={forgot}>Forgot password?</button>}<p className="auth-switch">{mode === "signup" ? "Already have an account?" : "New here?"} <button type="button" onClick={() => setMode(mode === "signup" ? "login" : "signup")}>{mode === "signup" ? "Log in" : "Create an account"}</button></p></form></div>;
+  const title = mode === "company-signup" ? "Create your company workspace" : mode === "signup" ? "Create your CFO workspace" : "Welcome back";
+  const description = mode === "company-signup"
+    ? "Create the company control center, then invite the users who need access."
+    : inviteToken
+      ? "Join the company using the invitation link you received."
+      : "Your financial data stays tied to the account you sign in with.";
+
+  return <div className="auth-shell">
+    <form className="auth-card" onSubmit={mode === "login" ? event => { event.preventDefault(); login(); } : submit}>
+      <div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div>
+      <div className="auth-title"><p className="eyebrow">{mode === "company-signup" ? "Company control center" : "Private financial workspace"}</p><h1>{title}</h1><p>{description}</p></div>
+
+      {!inviteToken && <div className="auth-switch auth-mode-switch"><button type="button" className={mode !== "company-signup" ? "active" : ""} onClick={() => setMode("login")}>User</button><button type="button" className={mode === "company-signup" ? "active" : ""} onClick={() => setMode("company-signup")}>Company</button></div>}
+      {mode === "login" && <div className="auth-inline-choice"><button type="button" className="text-button" onClick={() => setMode("signup")}>Create user account</button><button type="button" className="text-button" onClick={() => setMode("company-signup")}>Create company</button></div>}
+
+      {(mode === "signup" || mode === "company-signup") && <label>Name<input value={name} onChange={e => setName(e.target.value)} required placeholder="Your name" /></label>}
+      {mode === "company-signup" && <label>Company name<input value={companyName} onChange={e => setCompanyName(e.target.value)} required placeholder="Your company" /></label>}
+      <label>Email<input value={email} onChange={e => setEmail(e.target.value)} required type="email" placeholder="you@example.com" /></label>
+      <label>Password<input value={password} onChange={e => setPassword(e.target.value)} required minLength={8} type="password" placeholder="At least 8 characters" /></label>
+
+      <Button type="submit">{mode === "company-signup" ? "Create company" : mode === "signup" ? "Create account" : "Log in"}</Button>
+      {mode === "login" && <button type="button" className="text-button" onClick={forgot}>Forgot password?</button>}
+      {mode === "signup" && <p className="auth-note">New users start with an empty finance workspace. You add your own data during onboarding.</p>}
+      {mode === "company-signup" && <p className="auth-note">Company admins manage seats and membership. Individual user financial data stays private to each user.</p>}
+
+      <p className="auth-switch">{mode === "company-signup" ? "Need the user portal?" : "Need the company portal?"} <button type="button" onClick={() => setMode(mode === "company-signup" ? "login" : "company-signup")}>{mode === "company-signup" ? "Sign in" : "Create company"}</button></p>
+    </form>
+  </div>;
 }
 
 function Onboarding({ finish }) {
