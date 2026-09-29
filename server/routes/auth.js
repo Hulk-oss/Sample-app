@@ -31,7 +31,7 @@ router.post("/signup", async (req, res) => {
   if (exists) throw validation("An account with that email already exists.");
   const passwordHash = await bcrypt.hash(data.password, 12);
   const user = await User.create({ ...data, email: data.email.toLowerCase(), passwordHash });
-  await FinancialProfile.create({ userId: user._id });
+
   res.status(201).json({ token: issueToken(user), user: publicUser(user) });
 });
 
@@ -39,31 +39,6 @@ router.post("/login", async (req, res) => {
   const data = parse(loginSchema, req.body);
   const user = await User.findOne({ email: data.email.toLowerCase() });
   if (!user || !(await bcrypt.compare(data.password, user.passwordHash))) throw unauthorized("Email or password is incorrect");
-  res.json({ token: issueToken(user), user: publicUser(user) });
-});
-
-router.post("/demo", async (req, res) => {
-  const email = "demo@freelancercfo.local";
-  let user = await User.findOne({ email });
-  if (!user) {
-    user = await User.create({
-      name: "Alex Morgan",
-      email,
-      passwordHash: await bcrypt.hash(env.demoPassword, 12),
-      profession: "Independent Product Designer",
-      onboardingComplete: true,
-    });
-    await FinancialProfile.create({
-      userId: user._id,
-      monthlyIncomeGoal: 300000,
-      monthlyExpensesBaseline: 176000,
-      taxReserveRate: 0.22,
-      emergencyReserveTarget: 150000,
-      openingCashBalance: 13300,
-      taxReservedAmount: 145000,
-      relevantTaxIncomeBase: 659091,
-    });
-  }
   res.json({ token: issueToken(user), user: publicUser(user) });
 });
 
@@ -109,7 +84,9 @@ router.post("/onboarding", requireAuth, async (req, res) => {
       monthlyExpensesBaseline: data.monthlyExpenses,
       taxReserveRate: data.taxReserveRate,
       emergencyReserveTarget: data.emergencyReserveTarget,
-      openingCashBalance: data.currentCash - data.monthlyIncome + data.monthlyExpenses,
+      openingCashBalance: data.currentCash,
+      taxReservedAmount: 0,
+      relevantTaxIncomeBase: data.monthlyIncome,
     },
     { new: true, upsert: true }
   );
