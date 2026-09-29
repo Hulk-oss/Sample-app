@@ -95,8 +95,8 @@ function LandingPage({ onAuth }) {
           <button onClick={() => jump("about")}>About us</button>
         </nav>
         <div className="foodie-header-right">
-          <button className="foodie-social" aria-label="Instagram"><Instagram size={14} /></button>
-          <button className="foodie-social" aria-label="Favorites"><Heart size={13} /></button>
+          <button className="foodie-social" aria-label="Open Instagram" onClick={() => window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer")}><Instagram size={14} /></button>
+          <button className={"foodie-social foodie-social-heart " + (saved ? "active" : "")} aria-label={saved ? "Remove saved item" : "Save this site"} onClick={saveFavorite}><Heart size={13} fill={saved ? "currentColor" : "none"} /></button>
           <button className="foodie-login" onClick={() => onAuth("login")}>Log in</button>
           <button className="foodie-black-btn" onClick={() => onAuth("signup")}>Get started</button>
         </div>
