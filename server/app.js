@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import mongoose from "mongoose";
 import { env } from "./config.js";
 import authRoutes from "./routes/auth.js";
 import transactionRoutes from "./routes/transactions.js";
@@ -27,7 +28,16 @@ app.use(rateLimit({
   legacyHeaders: false,
 }));
 
-app.get("/api/health", (req, res) => res.json({ ok: true, service: "freelancer-cfo-api" }));
+app.get("/api/health", (req, res) => {
+  const states = ["disconnected", "connected", "connecting", "disconnecting"];
+  const dbState = states[mongoose.connection.readyState] || "unknown";
+  res.status(dbState === "connected" ? 200 : 503).json({
+    ok: dbState === "connected",
+    service: "freelancer-cfo-api",
+    database: dbState,
+    environment: env.nodeEnv,
+  });
+});
 app.use("/api/auth", authRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/invoices", invoiceRoutes);
