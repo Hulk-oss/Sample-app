@@ -9,12 +9,18 @@ import CompanyInvite from "../models/CompanyInvite.js";
 import { env } from "../config.js";
 import { requireAuth } from "../middleware/auth.js";
 import { parse, loginSchema, onboardingSchema, resetPasswordSchema, resetRequestSchema, signupSchema, companySignupSchema } from "../utils/validate.js";
-import { unauthorized, validation } from "../utils/errors.js";
+import { serviceUnavailable, unauthorized, validation } from "../utils/errors.js";
 
 const router = express.Router();
 
 function issueToken(user) {
-  return jwt.sign({ sub: user._id.toString(), email: user.email }, env.jwtSecret, { expiresIn: env.jwtExpiresIn });
+  try {
+    if (!env.jwtSecret) throw new Error("JWT_SECRET is missing.");
+    return jwt.sign({ sub: user._id.toString(), email: user.email }, String(env.jwtSecret), { expiresIn: env.jwtExpiresIn });
+  } catch (error) {
+    console.error("JWT issue failed", error);
+    throw serviceUnavailable("Authentication service is not configured correctly.");
+  }
 }
 
 function publicUser(user) {
@@ -71,7 +77,18 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   const data = parse(loginSchema, req.body);
   const user = await User.findOne({ email: data.email.toLowerCase() });
-  if (!user || !(await bcrypt.compare(data.password, user.passwordHash))) {
+  if (!user) {
+    throw unauthorized("Email or password is incorrect");
+  }
+
+  let passwordMatches = false;
+  try {
+    passwordMatches = await bcrypt.compare(data.password, user.passwordHash);
+  } catch (error) {
+    console.error("Password verification failed", error);
+  }
+
+  if (!passwordMatches) {
     throw unauthorized("Email or password is incorrect");
   }
 
