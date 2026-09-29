@@ -25,7 +25,8 @@ async function request(path, options = {}, token = localStorage.getItem("cfo_tok
   }
 
   if (!response.ok) {
-    const message = payload?.error?.message || ("Request failed (" + response.status + ")");
+    const message = payload?.error?.message
+      || ("Request failed (" + response.status + ") for " + API_BASE + path);
     throw new Error(message);
   }
 
