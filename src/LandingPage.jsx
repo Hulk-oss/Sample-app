@@ -73,7 +73,8 @@ function LandingPage({ onAuth }) {
           <button className="landing-text-btn" onClick={() => onAuth("login")}>Log in</button>
           <button className="landing-dark-btn landing-small-btn" onClick={() => onAuth("signup")}>Get started <ArrowUpRight size={14} /></button>
         </div>
-        <button className="landing-mobile-menu" aria-label="Open navigation" onClick={() => setMenuOpen(value => !value)}><Menu size={19} /></button>\n        {menuOpen && <div className="landing-mobile-nav"><button onClick={() => { scrollTo("landing-home"); setMenuOpen(false); }}>Home</button><button onClick={() => { scrollTo("landing-features"); setMenuOpen(false); }}>Features</button><button onClick={() => { scrollTo("landing-categories"); setMenuOpen(false); }}>How it works</button><button onClick={() => { onAuth("login"); setMenuOpen(false); }}>Log in</button><button onClick={() => { onAuth("signup"); setMenuOpen(false); }}>Get started</button></div>}
+        <button className="landing-mobile-menu" aria-label="Open navigation" onClick={() => setMenuOpen(value => !value)}><Menu size={19} /></button>
+        {menuOpen && <div className="landing-mobile-nav"><button onClick={() => { scrollTo("landing-home"); setMenuOpen(false); }}>Home</button><button onClick={() => { scrollTo("landing-features"); setMenuOpen(false); }}>Features</button><button onClick={() => { scrollTo("landing-categories"); setMenuOpen(false); }}>How it works</button><button onClick={() => { onAuth("login"); setMenuOpen(false); }}>Log in</button><button onClick={() => { onAuth("signup"); setMenuOpen(false); }}>Get started</button></div>}
       </header>
 
       <main>
