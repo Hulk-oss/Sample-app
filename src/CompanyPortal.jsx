@@ -9,6 +9,7 @@ const sections = [
   ["settings", "Company settings", Settings],
 ];
 
+function Badge({ children, tone = "neutral" }) { return <span className={"badge " + tone}>{children}</span>; }
 function Button({ children, onClick, variant = "primary", icon: Icon, type = "button" }) {
   return <button type={type} className={"button " + variant} onClick={onClick}>{Icon && <Icon size={14} />}{children}</button>;
 }
