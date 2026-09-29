@@ -12,6 +12,7 @@ import { calculateRunway, calculateSafeToSpend, calculateTaxReserve, formatFullI
 import { api } from "./api";
 import CompanyPortal from "./features/company/CompanyPortal";
 import LandingPage from "./LandingPage";
+import PublicPages from "./pages/PublicPages";
 import Auth from "./features/auth/Auth";
 import { userNavigation as nav } from "./app/navigation";
 import { Badge, Button, ChartCard, EmptyState, Head, Kpi } from "./components/ui/Primitives";
@@ -23,6 +24,7 @@ function App() {
   const [sidebar, setSidebar] = useState(false);
   const [auth, setAuth] = useState(Boolean(localStorage.getItem("cfo_token")));
   const [authOpen, setAuthOpen] = useState(false);
+  const [publicPage, setPublicPage] = useState(null);
   const [onboard, setOnboard] = useState(false);
   const [user, setUser] = useState(null);
   const [finance, setFinance] = useState(null);
@@ -110,10 +112,23 @@ function App() {
     }
   }
 
-  if (!auth) return <>
-    <LandingPage onAuth={mode => setAuthOpen(mode)} />
-    {authOpen && <Auth initialMode={authOpen} close={() => setAuthOpen(false)} setAuth={setAuth} onAuthenticated={loadWorkspace} notify={notify} />}
-  </>;
+  if (!auth) {
+    if (publicPage) {
+      return <PublicPages
+        page={publicPage}
+        onNavigate={setPublicPage}
+        onBack={() => setPublicPage(null)}
+        onAuth={mode => { setPublicPage(null); setAuthOpen(mode); }}
+      />;
+    }
+    return <>
+      <LandingPage
+        onAuth={mode => setAuthOpen(mode)}
+        onNavigate={setPublicPage}
+      />
+      {authOpen && <Auth initialMode={authOpen} close={() => setAuthOpen(false)} setAuth={setAuth} onAuthenticated={loadWorkspace} notify={notify} />}
+    </>;
+  }
   if (user?.role === "company_admin") return <CompanyPortal user={user} onLogout={logout} />;
   if (onboard || !finance) {
     if (loading && user && !onboard) {
