@@ -45,7 +45,7 @@ export const api = {
   async createInvoice(invoice) {\n    return request("/api/invoices", { method: "POST", body: JSON.stringify(invoice) });\n  },\n  async invoices() {
     return request("/api/invoices");
   },
-  async markInvoicePaid(id) {
+  async updateInvoice(id, invoice) {\n    return request("/api/invoices/" + id, { method: "PATCH", body: JSON.stringify(invoice) });\n  },\n  async deleteInvoice(id) {\n    return request("/api/invoices/" + id, { method: "DELETE" });\n  },\n  async markInvoicePaid(id) {
     return request("/api/invoices/" + id + "/mark-paid", { method: "POST" });
   },
   async reminderDraft(id) {
