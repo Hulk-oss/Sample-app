@@ -10,11 +10,11 @@ export const transactions=[
 {id:8,date:"2026-09-07",description:"Accounting",client:"—",category:"Professional",type:"Expense",amount:7500}
 ];
 export const invoices=[
-{id:"INV-1042",client:"Acme Labs",amount:180000,issueDate:"2026-08-25",dueDate:"2026-09-10",status:"Overdue"},
-{id:"INV-1043",client:"Northstar",amount:95000,issueDate:"2026-09-03",dueDate:"2026-10-03",status:"Due"},
+{id:"INV-1042",client:"Acme Labs",amount:120000,issueDate:"2026-08-25",dueDate:"2026-09-10",status:"Overdue"},
+{id:"INV-1043",client:"Northstar",amount:110000,issueDate:"2026-09-03",dueDate:"2026-10-03",status:"Due"},
 {id:"INV-1038",client:"Brightside",amount:72000,issueDate:"2026-08-01",dueDate:"2026-08-31",status:"Paid"},
-{id:"INV-1044",client:"Atlas Studio",amount:140000,issueDate:"2026-09-08",dueDate:"2026-09-22",status:"Overdue"},
-{id:"INV-1045",client:"Kiteworks",amount:85000,issueDate:"2026-09-17",dueDate:"2026-10-17",status:"Due"}
+{id:"INV-1044",client:"Atlas Studio",amount:55000,issueDate:"2026-09-08",dueDate:"2026-09-22",status:"Overdue"},
+{id:"INV-1045",client:"Kiteworks",amount:35000,issueDate:"2026-09-17",dueDate:"2026-09-24",status:"Overdue"}
 ];
 export const cashFlow=[
 {month:"Jul",income:310000,expenses:168000,balance:604000},
