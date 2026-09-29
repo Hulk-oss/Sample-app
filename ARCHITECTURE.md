@@ -1,64 +1,87 @@
 # Architecture
 
-## Product flow
+## Two-sided SaaS structure
 
 ```mermaid
 flowchart TB
- UI[React UI] --> P[Product pages]
- P --> C[Reusable components]
- P --> F[Deterministic finance engine]
- F --> R[Finance results]
- R --> AI[AI explanation layer]
- AI --> UI
- D[Demo or future persisted data] --> F
+ A[Authentication] --> R{User role}
+ R -->|user| U[User Portal]
+ R -->|company_admin| C[Company Portal]
+ U --> UF[Finance APIs]
+ UF --> F[Deterministic finance engine]
+ F --> DB[(MongoDB)]
+ C --> CF[Company APIs]
+ CF --> CM[Company membership and invitation data]
+ CM --> DB
+ UF --> AI[AI CFO explanation layer]
+ AI --> F
 ```
 
-## Responsibilities
+## User Portal
 
-- App shell: navigation, auth/onboarding state, modals and notifications.
-- Product pages: financial workflows and decision-oriented views.
-- Components: KPI cards, charts, tables, badges, buttons, alerts, forms and AI messages.
-- Finance engine: trusted deterministic formulas.
-- Data layer: demo records now; API/database later.
-- AI layer: explanation only, using trusted calculation results.
+The user side is private to the signed-in user.
 
-## AI safety boundary
+- Dashboard / Safe to Spend
+- Transactions
+- Invoices
+- Cash Flow
+- Tax Reserve
+- Runway
+- AI CFO
+- Personal settings
+
+All financial queries are scoped by userId.
+
+## Company Portal
+
+The company side is operational rather than financial.
+
+- Company overview
+- User/team management
+- Invitation management
+- Seat and onboarding metrics
+- Company settings
+
+Company admins cannot call the user finance APIs because those routes require the user role.
+
+## Authentication
 
 ```mermaid
 sequenceDiagram
- participant U as User
- participant UI as Web UI
- participant F as Finance Engine
- participant A as AI Service
- U->>UI: Ask question
- UI->>F: Request current finance context
- F-->>UI: Structured calculation results
- UI->>A: Question + trusted results
- A-->>UI: Explanation + next action
- UI-->>U: Clearly labeled response
+ participant B as Browser
+ participant API as Express API
+ participant DB as MongoDB
+ B->>API: Login / Signup
+ API->>DB: Verify or create User
+ API-->>B: JWT + role
+ B->>API: Authenticated request
+ API->>DB: Role + ownership checks
+ API-->>B: Scoped response
 ```
 
-## Production evolution
+## Financial source of truth
 
-1. Authenticated API
-2. Persistent database
-3. Server-side finance engine
-4. AI gateway receiving structured results only
-5. Audit logs for financial mutations and calculations
-6. Server-side authorization and rate limiting
+```mermaid
+flowchart LR
+ T[Transactions] --> FE[Finance Engine]
+ I[Invoices] --> FE
+ P[Financial Profile] --> FE
+ FE --> S[Safe to Spend]
+ FE --> R[Runway]
+ FE --> C[Cash Flow]
+ FE --> TR[Tax Reserve]
+ FE --> CTX[Trusted AI Context]
+ CTX --> AI[AI explanation]
+```
 
-## Design tokens
+The AI layer explains deterministic results. It does not own critical financial calculations.
 
-| Token | Value |
-|---|---|
-| Background | #070709 |
-| Surface | #111216 |
-| Surface 2 | #181A20 |
-| Border | #3C414C |
-| Text | #D9D8DC |
-| Muted | #858995 |
-| Primary | #6065FA |
-| Accent | #585999 |
-| Warning | #D75A35 |
+## Deployment
 
-The interface avoids decorative gradients, excessive glassmorphism, and unnecessary motion.
+The React/Vite application is deployed as the frontend while /api/* is handled by the Vercel Node function in api/[...path].js. Local development uses server/index.js.
+
+MongoDB is the persistent data store. Production requires MONGODB_URI, JWT_SECRET, JWT_EXPIRES_IN, and CLIENT_ORIGIN.
+
+## UI direction
+
+The user portal and company portal share the reference-inspired editorial system: warm light canvas, white rounded cards, large typography, compact pills, and generous whitespace. The information architecture differs between the two roles.
