@@ -11,17 +11,20 @@ export default function PlatformPortal({ user, onLogout }) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [finance, setFinance] = useState(null);
   const [error, setError] = useState("");
+  const [audit, setAudit] = useState([]);
 
   async function load() {
     try {
-      const [summary, userData, companyData] = await Promise.all([
+      const [summary, userData, companyData, auditData] = await Promise.all([
         api.adminOverview(),
         api.adminUsers(),
         api.adminCompanies(),
+        api.adminAudit(),
       ]);
       setOverview(summary.metrics);
       setUsers(userData.users);
       setCompanies(companyData.companies);
+      setAudit(auditData.events || []);
       setError("");
     } catch (err) {
       setError(err.message);
@@ -60,6 +63,7 @@ export default function PlatformPortal({ user, onLogout }) {
         <button className="active"><Database size={15} />Overview</button>
         <button onClick={() => document.getElementById("platform-users")?.scrollIntoView({behavior:"smooth"})}><Users size={15} />Users</button>
         <button onClick={() => document.getElementById("platform-companies")?.scrollIntoView({behavior:"smooth"})}><Building2 size={15} />Organizations</button>
+        <button onClick={() => document.getElementById("platform-audit")?.scrollIntoView({behavior:"smooth"})}><ShieldCheck size={15} />Audit</button>
       </nav>
       <div className="sidebar-bottom"><button onClick={onLogout}><LogOut size={16} />Logout</button></div>
     </aside>
@@ -92,6 +96,16 @@ export default function PlatformPortal({ user, onLogout }) {
               {companies.map(item => <tr key={item._id}><td>{item.name}</td><td>{item.plan}</td><td>{item.memberCount}</td><td>{item.seatLimit}</td><td>{item.status}</td></tr>)}
             </tbody></table></div>
           </section>
+
+          <section className="card" id="platform-audit">
+            <div className="section-head"><div><h3>Privileged access audit</h3><p>Recorded inspections performed through the owner console.</p></div></div>
+            <div className="table-wrap"><table><thead><tr><th>Time</th><th>Action</th><th>Target</th><th>Target ID</th></tr></thead><tbody>
+              {audit.map(event => <tr key={event._id}><td>{new Date(event.createdAt).toLocaleString("en-IN")}</td><td>{event.action}</td><td>{event.targetType}</td><td>{event.targetId}</td></tr>)}
+            </tbody></table></div>
+            {!audit.length && <p className="empty-state">No privileged inspections have been recorded.</p>}
+          </section>
+
+
         </div>
       </div>
     </main>
