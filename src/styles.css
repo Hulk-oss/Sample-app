@@ -263,3 +263,12 @@ tr:last-child td{border-bottom:0}
   .safe-copy{padding:18px}.ai-insight{align-items:flex-start;flex-wrap:wrap}.ai-insight .button{margin-left:51px}
   .invoice-row{gap:8px}.modal{padding:17px}
 }
+
+.empty-state{min-height:150px;display:grid;place-items:center;text-align:center;align-content:center;gap:7px;padding:25px 10px;color:#8a867d}
+.empty-state h3{margin:0;color:#36332e;font-size:12px}
+.empty-state p{margin:0;max-width:320px;font-size:9px;line-height:1.55;color:#97938a}
+.empty-icon{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#f0eee8;color:#716d65}
+.modal-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px}
+.modal-fields label{display:grid;gap:6px;color:#817d74;font-size:9px}
+.modal-fields input,.modal-fields select{width:100%;background:#faf9f6;border:1px solid var(--border);border-radius:10px;color:#292722;padding:10px;font-size:10px}
+@media(max-width:560px){.modal-fields{grid-template-columns:1fr}}
