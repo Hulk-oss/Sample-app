@@ -5,7 +5,10 @@ import {
   LayoutDashboard,
   Mail,
   ReceiptText,
-  Settings,\n  Bell,\n  CircleHelp,\n  CreditCard,
+  Settings,
+  Bell,
+  CircleHelp,
+  CreditCard,
   ShieldCheck,
   Target,
   Users,
@@ -19,12 +22,16 @@ export const userNavigation = [
   ["tax", "Tax Reserve", ShieldCheck],
   ["runway", "Runway", Target],
   ["ai", "AI CFO", Bot],
-  ["settings", "Settings", Settings],\n  ["billing", "Billing", CreditCard],\n  ["notifications", "Notifications", Bell],\n  ["help", "Help", CircleHelp],
+  ["settings", "Settings", Settings],
+  ["billing", "Billing", CreditCard],
+  ["notifications", "Notifications", Bell],
+  ["help", "Help", CircleHelp],
 ];
 
 export const companyNavigation = [
   ["overview", "Overview", LayoutDashboard],
   ["team", "Team", Users],
   ["invites", "Invitations", Mail],
-  ["settings", "Company settings", Settings],\n  ["billing", "Billing", CreditCard],
+  ["settings", "Company settings", Settings],
+  ["billing", "Billing", CreditCard],
 ];
