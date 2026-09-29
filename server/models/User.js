@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
   companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null, index: true },
   onboardingComplete: { type: Boolean, default: false },
   resetPasswordTokenHash: { type: String, default: null },
-  resetPasswordExpiresAt: { type: Date, default: null }
+  resetPasswordExpiresAt: { type: Date, default: null },
+  lastLoginAt: { type: Date, default: null }
 }, { timestamps: true });
 export default mongoose.model("User", userSchema);
