@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ArrowRight, ArrowUpRight, Check, ChevronDown, Menu, Sparkles } from "lucide-react";
 
 const iconUrl = name => `https://api.iconify.design/${name}.svg?color=%23131312`;
@@ -55,6 +56,7 @@ function FlowTag({ children, tone = "mint" }) {
 }
 
 function LandingPage({ onAuth }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const scrollTo = id => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
@@ -71,7 +73,7 @@ function LandingPage({ onAuth }) {
           <button className="landing-text-btn" onClick={() => onAuth("login")}>Log in</button>
           <button className="landing-dark-btn landing-small-btn" onClick={() => onAuth("signup")}>Get started <ArrowUpRight size={14} /></button>
         </div>
-        <button className="landing-mobile-menu" aria-label="Open navigation"><Menu size={19} /></button>
+        <button className="landing-mobile-menu" aria-label="Open navigation" onClick={() => setMenuOpen(value => !value)}><Menu size={19} /></button>\n        {menuOpen && <div className="landing-mobile-nav"><button onClick={() => { scrollTo("landing-home"); setMenuOpen(false); }}>Home</button><button onClick={() => { scrollTo("landing-features"); setMenuOpen(false); }}>Features</button><button onClick={() => { scrollTo("landing-categories"); setMenuOpen(false); }}>How it works</button><button onClick={() => { onAuth("login"); setMenuOpen(false); }}>Log in</button><button onClick={() => { onAuth("signup"); setMenuOpen(false); }}>Get started</button></div>}
       </header>
 
       <main>
@@ -175,7 +177,7 @@ function LandingPage({ onAuth }) {
           <div className="landing-section-head centered">
             <span className="landing-kicker">A calmer way to plan</span>
             <h2>Clear screens. Softer edges. Better decisions.</h2>
-            <p>Designed around the same visual rhythm as the food template you shared: simple navigation, bold headings, colorful category cards and focused content blocks. citeturn933494view0</p>
+            <p>Designed around the same visual rhythm as the food template you shared: simple navigation, bold headings, colorful category cards and focused content blocks.</p>
           </div>
           <div className="landing-photo-grid">
             <div className="landing-photo-tile tint-blue"><Icon name="mdi:wallet-outline" /><strong>Cash</strong><span>Know what is available.</span></div>
