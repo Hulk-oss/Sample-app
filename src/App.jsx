@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { calculateRunway, calculateSafeToSpend, calculateTaxReserve, formatFullINR, formatINR } from "./finance";
 import { api } from "./api";
-import CompanyPortal from "./CompanyPortal";
+import CompanyPortal from "./features/company/CompanyPortal";
 import LandingPage from "./LandingPage";
 import Auth from "./features/auth/Auth";
 import { userNavigation as nav } from "./app/navigation";
