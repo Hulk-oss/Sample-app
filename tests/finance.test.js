@@ -10,15 +10,15 @@ import {
 
 test("safe to spend follows the product formula", () => {
   assert.equal(calculateSafeToSpend({
-    cashBalance: 742000,
-    taxReserve: 145000,
-    upcomingExpenses: 115000,
-    emergencyReserve: 150000,
-  }), 332000);
+    cashBalance: 100000,
+    taxReserve: 10000,
+    upcomingExpenses: 15000,
+    emergencyReserve: 25000,
+  }), 50000);
 });
 
 test("runway uses available cash divided by monthly expenses", () => {
-  assert.equal(calculateRunway({ availableCash: 597000, averageMonthlyExpenses: 176000 }), 597000 / 176000);
+  assert.equal(calculateRunway({ availableCash: 90000, averageMonthlyExpenses: 30000 }), 597000 / 176000);
 });
 
 test("tax reserve uses configured rate and income base", () => {
