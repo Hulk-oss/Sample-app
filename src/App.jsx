@@ -195,8 +195,8 @@ function App() {
 
       <div className="content">
         {page === "dashboard" && <Dashboard {...common} />}
-        {page === "transactions" && <Transactions data={transactions} query={query} setQuery={setQuery} add={addTransaction} />}
-        {page === "invoices" && <Invoices data={invoices} markPaid={markPaid} setModal={setModal} />}
+        {page === "transactions" && <Transactions data={transactions} query={query} setQuery={setQuery} add={addTransaction} setModal={setModal} reload={loadWorkspace} notify={notify} />}
+        {page === "invoices" && <Invoices data={invoices} markPaid={markPaid} setModal={setModal} reload={loadWorkspace} notify={notify} />}
         {page === "cashflow" && <CashFlow data={cashData} />}
         {page === "tax" && <TaxReserve finance={finance} reload={loadWorkspace} notify={notify} />}
         {page === "runway" && <Runway finance={finance} />}
@@ -211,8 +211,8 @@ function App() {
       </button>
     )}</div>
 
-    {modal?.type === "transaction" && <TransactionModal close={() => setModal(null)} notify={notify} reload={loadWorkspace} />}
-    {modal?.type === "invoice" && <InvoiceModal close={() => setModal(null)} notify={notify} reload={loadWorkspace} />}
+    {modal?.type === "transaction" && <TransactionModal close={() => setModal(null)} notify={notify} reload={loadWorkspace} transaction={modal.transaction} />}
+    {modal?.type === "invoice" && <InvoiceModal close={() => setModal(null)} notify={notify} reload={loadWorkspace} invoice={modal.invoice} />}
     {modal?.type === "reminder" && <Reminder invoice={modal.invoice} close={() => setModal(null)} notify={notify} />}
     {toast && <div className="toast"><Check size={14} />{toast}</div>}
   </div>;
@@ -293,41 +293,67 @@ function ListRow({ title, sub, value }) {
   return <div className="row"><div><b>{title}</b><small>{sub}</small></div><strong>{value}</strong></div>;
 }
 
-function Transactions({ data, query, setQuery, add }) {
-  const filtered = data.filter(row => [row.description, row.client, row.category].join(" ").toLowerCase().includes(query.toLowerCase()));
+function Transactions({ data, query, setQuery, add, setModal, reload, notify }) {
+  const [typeFilter, setTypeFilter] = useState("All");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  const categories = ["All", ...new Set(data.map(row => row.category).filter(Boolean))];
+  const filtered = data.filter(row =>
+    [row.description, row.client, row.category].join(" ").toLowerCase().includes(query.toLowerCase()) &&
+    (typeFilter === "All" || row.type === typeFilter) &&
+    (categoryFilter === "All" || row.category === categoryFilter)
+  );
   const income = data.filter(row => row.type === "Income").reduce((a, row) => a + Number(row.amount), 0);
   const expense = data.filter(row => row.type === "Expense").reduce((a, row) => a + Number(row.amount), 0);
+
+  async function remove(id) {
+    try {
+      await api.deleteTransaction(id);
+      await reload();
+      notify("Transaction deleted");
+    } catch (error) { notify(error.message); }
+  }
+
   return <div className="page">
     <Head eyebrow="Money in and out" title="Transactions" text="Every financial movement stays tied to the signed-in user." action={<Button icon={Plus} onClick={add}>Add transaction</Button>} />
     <div className="summary-grid"><Kpi label="Income" value={money(income)} sub="Your recorded period" icon={ArrowDownRight} /><Kpi label="Expenses" value={money(expense)} sub="Your recorded period" icon={ArrowUpRight} /><Kpi label="Net" value={money(income - expense)} sub="Income less expenses" icon={TrendingUp} /></div>
     <section className="card">
-      <div className="toolbar"><div className="search"><Search size={15} /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search your transactions..." /></div><div className="filters"><Button variant="secondary">All types <ChevronDown size={13} /></Button><Button variant="secondary">Category <ChevronDown size={13} /></Button><Button variant="secondary">Date</Button></div></div>
-      {filtered.length ? <DataTable headers={["Date", "Description", "Client", "Category", "Type", "Amount"]} rows={filtered.map(row => [
+      <div className="toolbar">
+        <div className="search"><Search size={15} /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search your transactions..." /></div>
+        <div className="filters">
+          <select className="filter-select" value={typeFilter} onChange={e => setTypeFilter(e.target.value)}><option>All</option><option>Income</option><option>Expense</option></select>
+          <select className="filter-select" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}>{categories.map(category => <option key={category}>{category}</option>)}</select>
+          <Button variant="secondary" onClick={() => { setQuery(""); setTypeFilter("All"); setCategoryFilter("All"); }}>Reset</Button>
+        </div>
+      </div>
+      {filtered.length ? <DataTable headers={["Date", "Description", "Client", "Category", "Type", "Amount", "Actions"]} rows={filtered.map(row => [
         new Date(row.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }),
         row.description, row.client || "—", row.category,
-        <Badge tone={row.type === "Income" ? "success" : "neutral"}>{row.type}</Badge>, money(row.amount)
+        <Badge tone={row.type === "Income" ? "success" : "neutral"}>{row.type}</Badge>, money(row.amount),
+        <div className="table-actions"><button title="Edit" onClick={() => setModal({ type: "transaction", transaction: row })}>Edit</button><button title="Delete" onClick={() => remove(row._id || row.id)}>Delete</button></div>
       ])} /> : <EmptyState title="No transactions" text="Add your first income or expense to start building the financial history." action={<Button icon={Plus} onClick={add}>Add transaction</Button>} />}
     </section>
   </div>;
 }
-
 function DataTable({ headers, rows }) {
   return <div className="table-wrap"><table><thead><tr>{headers.map(header => <th key={header}>{header}</th>)}</tr></thead><tbody>{rows.map((row, i) => <tr key={i}>{row.map((cell, j) => <td key={j}>{cell}</td>)}</tr>)}</tbody></table></div>;
 }
 
-function Invoices({ data, markPaid, setModal }) {
+function Invoices({ data, markPaid, setModal, reload, notify }) {
   const total = data.reduce((a, row) => a + Number(row.amount), 0);
   const paid = data.filter(row => row.status === "Paid").reduce((a, row) => a + Number(row.amount), 0);
   const overdue = data.filter(row => row.status === "Overdue").reduce((a, row) => a + Number(row.amount), 0);
+  async function remove(id) {
+    try { await api.deleteInvoice(id); await reload(); notify("Invoice deleted"); }
+    catch (error) { notify(error.message); }
+  }
   return <div className="page">
     <Head eyebrow="Accounts receivable" title="Invoices" text="Track the invoices that belong to your account." action={<Button icon={Plus} onClick={() => setModal({ type: "invoice" })}>Create invoice</Button>} />
     <div className="summary-grid"><Kpi label="Total invoiced" value={money(total)} sub={data.length + " invoices"} icon={FileText} /><Kpi label="Paid" value={money(paid)} sub="Collected" icon={Check} /><Kpi label="Outstanding" value={money(total - paid)} sub="Awaiting payment" icon={Wallet} /></div>
     <section className="card"><div className="section-head"><div><h3>Invoice register</h3><p>Your clients and payment status</p></div><Badge tone={overdue ? "warning" : "success"}>{overdue ? money(overdue) + " overdue" : "No overdue balance"}</Badge></div>
-      {data.length ? <div className="invoice-list">{data.map(row => { const id = row._id || row.id; const invoiceNumber = row.invoiceNumber || row.id; return <div className="invoice-row" key={id}><div className="invoice-main"><span className="invoice-logo">{String(row.client).slice(0, 1).toUpperCase()}</span><div><b>{row.client}</b><small>{invoiceNumber} · Due {new Date(row.dueDate).toLocaleDateString("en-IN")}</small></div></div><strong>{money(row.amount)}</strong><Badge tone={String(row.status).toLowerCase()}>{row.status}</Badge><div className="invoice-actions"><button title="View"><FileText size={14} /></button>{row.status !== "Paid" && <button title="Mark paid" onClick={() => markPaid(id)}><Check size={14} /></button>}<button title="Reminder draft" onClick={() => setModal({ type: "reminder", invoice: row })}><MessageSquare size={14} /></button></div></div>; })}</div> : <EmptyState title="No invoices yet" text="Create your first invoice when you are ready to track receivables." />}
+      {data.length ? <div className="invoice-list">{data.map(row => { const id = row._id || row.id; const invoiceNumber = row.invoiceNumber || row.id; return <div className="invoice-row" key={id}><div className="invoice-main"><span className="invoice-logo">{String(row.client).slice(0, 1).toUpperCase()}</span><div><b>{row.client}</b><small>{invoiceNumber} · Due {new Date(row.dueDate).toLocaleDateString("en-IN")}</small></div></div><strong>{money(row.amount)}</strong><Badge tone={String(row.status).toLowerCase()}>{row.status}</Badge><div className="invoice-actions"><button title="Edit" onClick={() => setModal({ type: "invoice", invoice: row })}><FileText size={14} /></button>{row.status !== "Paid" && <button title="Mark paid" onClick={() => markPaid(id)}><Check size={14} /></button>}<button title="Reminder draft" onClick={() => setModal({ type: "reminder", invoice: row })}><MessageSquare size={14} /></button><button title="Delete" onClick={() => remove(id)}><Trash2 size={14} /></button></div></div>; })}</div> : <EmptyState title="No invoices yet" text="Create your first invoice when you are ready to track receivables." />}
     </section>
   </div>;
 }
-
 function CashFlow({ data }) {
   const [mode, setMode] = useState("actual");
   const visible = mode === "actual" ? data.filter(row => !row.estimated) : data.filter(row => row.estimated);
@@ -417,17 +443,26 @@ function Toggle({ text, on: initial = false }) {
   return <button className="toggle-row" onClick={() => setOn(!on)}><span>{text}</span><i className={on ? "on" : ""}><b /></i></button>;
 }
 
-function TransactionModal({ close, notify, reload }) {
-  const [form, setForm] = useState({ date: new Date().toISOString().slice(0,10), description: "", client: "", category: "", type: "Income", amount: "" });
+function TransactionModal({ close, notify, reload, transaction }) {
+  const [form, setForm] = useState(transaction ? {
+    date: new Date(transaction.date).toISOString().slice(0, 10),
+    description: transaction.description || "",
+    client: transaction.client || "",
+    category: transaction.category || "",
+    type: transaction.type || "Income",
+    amount: transaction.amount || ""
+  } : { date: new Date().toISOString().slice(0,10), description: "", client: "", category: "", type: "Income", amount: "" });
+  const editing = Boolean(transaction?._id);
   async function save(event) {
     event.preventDefault();
     try {
-      await api.createTransaction({ ...form, amount: Number(form.amount) });
-      close(); await reload(); notify("Transaction added");
+      if (editing) await api.updateTransaction(transaction._id, { ...form, amount: Number(form.amount) });
+      else await api.createTransaction({ ...form, amount: Number(form.amount) });
+      close(); await reload(); notify(editing ? "Transaction updated" : "Transaction added");
     } catch (error) { notify(error.message); }
   }
   return <div className="modal-backdrop" onMouseDown={close}><form className="modal" onMouseDown={e => e.stopPropagation()} onSubmit={save}>
-    <div className="modal-head"><div><p className="eyebrow">Your data</p><h3>Add transaction</h3></div><button type="button" onClick={close}><X size={17} /></button></div>
+    <div className="modal-head"><div><p className="eyebrow">Your data</p><h3>{editing ? "Edit transaction" : "Add transaction"}</h3></div><button type="button" onClick={close}><X size={17} /></button></div>
     <div className="modal-fields">
       <label>Date<input type="date" required value={form.date} onChange={e => setForm(v => ({...v,date:e.target.value}))}/></label>
       <label>Type<select value={form.type} onChange={e => setForm(v => ({...v,type:e.target.value}))}><option>Income</option><option>Expense</option></select></label>
@@ -436,26 +471,32 @@ function TransactionModal({ close, notify, reload }) {
       <label>Category<input required value={form.category} onChange={e => setForm(v => ({...v,category:e.target.value}))}/></label>
       <label>Amount<input required min="0.01" type="number" step="0.01" value={form.amount} onChange={e => setForm(v => ({...v,amount:e.target.value}))}/></label>
     </div>
-    <div className="modal-actions"><Button variant="secondary" onClick={close}>Cancel</Button><Button type="submit" icon={Check}>Save transaction</Button></div>
+    <div className="modal-actions"><Button variant="secondary" onClick={close}>Cancel</Button><Button type="submit" icon={Check}>{editing ? "Save changes" : "Save transaction"}</Button></div>
   </form></div>;
 }
-
-function InvoiceModal({ close, notify, reload }) {
-  const [form, setForm] = useState({ invoiceNumber: "", client: "", amount: "", issueDate: new Date().toISOString().slice(0,10), dueDate: "" });
+function InvoiceModal({ close, notify, reload, invoice }) {
+  const [form, setForm] = useState(invoice ? {
+    invoiceNumber: invoice.invoiceNumber || invoice.id || "",
+    client: invoice.client || "",
+    amount: invoice.amount || "",
+    issueDate: new Date(invoice.issueDate).toISOString().slice(0,10),
+    dueDate: new Date(invoice.dueDate).toISOString().slice(0,10)
+  } : { invoiceNumber: "", client: "", amount: "", issueDate: new Date().toISOString().slice(0,10), dueDate: "" });
+  const editing = Boolean(invoice?._id);
   async function save(event) {
     event.preventDefault();
     try {
-      await api.createInvoice({ ...form, amount: Number(form.amount) });
-      close(); await reload(); notify("Invoice created");
+      if (editing) await api.updateInvoice(invoice._id, { ...form, amount: Number(form.amount) });
+      else await api.createInvoice({ ...form, amount: Number(form.amount) });
+      close(); await reload(); notify(editing ? "Invoice updated" : "Invoice created");
     } catch (error) { notify(error.message); }
   }
   return <div className="modal-backdrop" onMouseDown={close}><form className="modal" onMouseDown={e => e.stopPropagation()} onSubmit={save}>
-    <div className="modal-head"><div><p className="eyebrow">Your data</p><h3>Create invoice</h3></div><button type="button" onClick={close}><X size={17}/></button></div>
+    <div className="modal-head"><div><p className="eyebrow">Your data</p><h3>{editing ? "Edit invoice" : "Create invoice"}</h3></div><button type="button" onClick={close}><X size={17}/></button></div>
     <div className="modal-fields"><label>Invoice number<input required value={form.invoiceNumber} onChange={e=>setForm(v=>({...v,invoiceNumber:e.target.value}))}/></label><label>Client<input required value={form.client} onChange={e=>setForm(v=>({...v,client:e.target.value}))}/></label><label>Amount<input required min="0.01" type="number" step="0.01" value={form.amount} onChange={e=>setForm(v=>({...v,amount:e.target.value}))}/></label><label>Issue date<input required type="date" value={form.issueDate} onChange={e=>setForm(v=>({...v,issueDate:e.target.value}))}/></label><label>Due date<input required type="date" value={form.dueDate} onChange={e=>setForm(v=>({...v,dueDate:e.target.value}))}/></label></div>
-    <div className="modal-actions"><Button variant="secondary" onClick={close}>Cancel</Button><Button type="submit" icon={Check}>Create invoice</Button></div>
+    <div className="modal-actions"><Button variant="secondary" onClick={close}>Cancel</Button><Button type="submit" icon={Check}>{editing ? "Save changes" : "Create invoice"}</Button></div>
   </form></div>;
 }
-
 function Reminder({ invoice, close, notify }) {
   const invoiceNumber = invoice.invoiceNumber || invoice.id;
   const [text, setText] = useState("Hi " + invoice.client + ",\n\nJust a quick reminder that invoice " + invoiceNumber + " for " + money(invoice.amount) + " is now due or overdue. Could you share an expected payment date?\n\nThanks");
