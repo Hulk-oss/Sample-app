@@ -55,15 +55,19 @@ function App() {
         setOnboard(true);
         return;
       }
+      const canUseCashFlow = isUserFeatureEnabled({ ...me.user, companyPlan: me.company?.plan || null }, "cashflow");
       const [dashboard, tx, inv, cashFlow] = await Promise.all([
-        api.dashboard(), api.transactions(), api.invoices(), api.cashFlow()
+        api.dashboard(),
+        api.transactions(),
+        api.invoices(),
+        canUseCashFlow ? api.cashFlow() : Promise.resolve({ actual: [], forecast: [] }),
       ]);
       setFinance(dashboard.dashboard);
       setTransactions(tx.transactions);
       setInvoices(inv.invoices);
       setCashData([
-        ...cashFlow.actual,
-        ...cashFlow.forecast.map(row => ({ ...row, month: row.month + " est." })),
+        ...(cashFlow.actual || []),
+        ...(cashFlow.forecast || []).map(row => ({ ...row, month: row.month + " est." })),
       ]);
       setOnboard(false);
     } catch (error) {
