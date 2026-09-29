@@ -44,7 +44,7 @@ function Kpi({ label, value, sub, icon: Icon, tone = "" }) {
 }
 
 function EmptyState({ title, text, action }) {
-  return <div className="empty-state">{<div className="empty-icon"><Sparkles size={16} /></div>}<h3>{title}</h3><p>{text}</p>{action}</div>;
+  return <div className="empty-state">{<div className="empty-icon"><WalletCards size={16} /></div>}<h3>{title}</h3><p>{text}</p>{action}</div>;
 }
 
 function ChartCard({ title, subtitle, children, action }) {
@@ -160,7 +160,7 @@ function App() {
   if (user?.role === "company_admin") return <CompanyPortal user={user} onLogout={logout} />;
   if (onboard || !finance) {
     if (loading && user && !onboard) {
-      return <div className="auth-shell"><div className="auth-card"><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div><p>Loading your private workspace…</p></div></div>;
+      return <div className="auth-shell"><div className="auth-card"><div className="brand"><span className="brand-mark"><WalletCards size={16} /></span>Freelancer CFO</div><p>Loading your private workspace…</p></div></div>;
     }
     return <Onboarding finish={finishOnboarding} />;
   }
@@ -173,7 +173,7 @@ function App() {
 
   return <div className="app-shell">
     <aside className={"sidebar " + (sidebar ? "open" : "")}>
-      <div className="brand"><span className="brand-mark"><Sparkles size={17} /></span>Freelancer CFO</div>
+      <div className="brand"><span className="brand-mark"><WalletCards size={17} /></span>Freelancer CFO</div>
       <div className="workspace">
         <span className="avatar">{String(user?.name || "").slice(0, 2).toUpperCase()}</span>
         <div><b>{user?.name}</b><small>{user?.profession || "Independent"}</small></div>
@@ -236,7 +236,7 @@ function Dashboard({ finance, user, transactions, overdue, cashData, setPage }) 
 
     <div className="kpi-grid">
       <Kpi label="Cash Balance" value={money(finance.cashBalance)} sub="Available from your records" icon={Wallet} />
-      <Kpi label="Safe to Spend" value={money(finance.safeToSpend)} sub="After reserves & planned outflows" icon={Sparkles} />
+      <Kpi label="Safe to Spend" value={money(finance.safeToSpend)} sub="After reserves & planned outflows" icon={Wallet} />
       <Kpi label="Receivables" value={money(finance.receivables)} sub="Outstanding invoices" icon={ReceiptText} />
       <Kpi label="Runway" value={finance.runwayMonths.toFixed(1) + " mo"} sub="Target 6 months" icon={Target} tone={finance.runwayMonths < 6 ? "warning" : ""} />
     </div>
@@ -581,7 +581,7 @@ function Auth({ initialMode = "login", close, setAuth, onAuthenticated, notify }
 
   return <div className="auth-shell landing-auth-overlay">
     <form className="auth-card" onSubmit={mode === "login" ? event => { event.preventDefault(); login(); } : submit}>
-      <div className="auth-modal-top"><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div>{close && <button type="button" className="auth-close" onClick={close}><X size={17} /></button>}</div>
+      <div className="auth-modal-top"><div className="brand"><span className="brand-mark"><WalletCards size={16} /></span>Freelancer CFO</div>{close && <button type="button" className="auth-close" onClick={close}><X size={17} /></button>}</div>
       <div className="auth-title"><p className="eyebrow">{mode === "company-signup" ? "Company control center" : "Private financial workspace"}</p><h1>{title}</h1><p>{description}</p></div>
 
       {!inviteToken && <div className="auth-switch auth-mode-switch"><button type="button" className={mode !== "company-signup" ? "active" : ""} onClick={() => changeMode("login")}>User</button><button type="button" className={mode === "company-signup" ? "active" : ""} onClick={() => changeMode("company-signup")}>Company</button></div>}
@@ -631,7 +631,7 @@ function Onboarding({ finish }) {
     finish(payload);
   }
   const current = steps[step];
-  return <div className="onboarding"><div className="onboard-top"><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div><span>Step {step + 1} of 4</span></div><div className="progress"><i style={{ width: (step + 1) * 25 + "%" }} /></div><div className="onboard-card"><p className="eyebrow">Set up your guardrails</p><h1>{current[0]}</h1><p>These values belong only to your account and power your finance calculations.</p><div className="onboard-fields">{current[1].map(([key, label]) => <label key={key}>{label}<input value={form[key]} onChange={e => setField(key, e.target.value)} required type={["name", "profession"].includes(key) ? "text" : "number"} /></label>)}</div><div className="onboard-actions">{step > 0 && <Button variant="secondary" onClick={() => setStep(step - 1)}>Back</Button>}<Button onClick={next}>{step === 3 ? "Finish setup" : "Continue"}</Button></div></div></div>;
+  return <div className="onboarding"><div className="onboard-top"><div className="brand"><span className="brand-mark"><WalletCards size={16} /></span>Freelancer CFO</div><span>Step {step + 1} of 4</span></div><div className="progress"><i style={{ width: (step + 1) * 25 + "%" }} /></div><div className="onboard-card"><p className="eyebrow">Set up your guardrails</p><h1>{current[0]}</h1><p>These values belong only to your account and power your finance calculations.</p><div className="onboard-fields">{current[1].map(([key, label]) => <label key={key}>{label}<input value={form[key]} onChange={e => setField(key, e.target.value)} required type={["name", "profession"].includes(key) ? "text" : "number"} /></label>)}</div><div className="onboard-actions">{step > 0 && <Button variant="secondary" onClick={() => setStep(step - 1)}>Back</Button>}<Button onClick={next}>{step === 3 ? "Finish setup" : "Continue"}</Button></div></div></div>;
 }
 
 export default App;
