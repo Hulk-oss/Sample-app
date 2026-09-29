@@ -15,32 +15,41 @@
 
 Create .env from .env.example.
 
-## Development
-
-Start frontend and API together:
+## Local development
 
     npm run dev:full
 
-Or separately:
+Frontend: http://localhost:5173
+
+API: http://localhost:5000
+
+## Account flows
+
+### User side
+
+1. Create a user account.
+2. Complete personal financial onboarding.
+3. Add your own transactions and invoices.
+4. Review Safe to Spend, Cash Flow, Tax Reserve, Runway, and AI CFO.
+
+### Company side
+
+1. Choose Company on the authentication screen.
+2. Create the company workspace.
+3. Open the Company Portal.
+4. Invite users by email.
+5. Share the generated invitation link with the intended user.
+6. The invited user signs up through that link and remains the owner of their own private financial records.
+
+There is no demo account and no seed command. New accounts start without sample customer data.
+
+## Commands
 
     npm run dev
     npm run dev:server
-
-## Build and test
-
+    npm run dev:full
     npm test
     npm run build
-
-## First-user flow
-
-1. Create a new account.
-2. Complete the four onboarding steps with your own financial information.
-3. Add your own transactions.
-4. Add your own invoices.
-5. Review Safe to Spend, Cash Flow, Tax Reserve, and Runway.
-6. Ask AI CFO questions about your stored numbers.
-
-There is no demo account and there is no seed command. A new account starts without customer financial records.
 
 ## Environment
 
@@ -52,10 +61,13 @@ There is no demo account and there is no seed command. A new account starts with
 
 ## Project map
 
-- src/App.jsx: product screens, entry forms, empty states, responsive shell
-- src/styles.css: reference-inspired visual system and responsive behavior
+- src/App.jsx: user portal and authentication flow
+- src/CompanyPortal.jsx: company admin portal
+- src/styles.css: shared editorial UI
 - src/api.js: frontend API client
-- server/routes: auth, financial, analytics, AI
-- server/finance/engine.js: trusted calculations
-- server/models: MongoDB models
+- server/app.js: Express app
+- server/routes/auth.js: authentication and signup
+- server/routes/company.js: company administration
+- server/finance/engine.js: deterministic finance calculations
+- api/[...path].js: Vercel serverless API entrypoint
 - tests/finance.test.js: finance formula tests
