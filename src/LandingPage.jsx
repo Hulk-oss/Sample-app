@@ -78,17 +78,17 @@ function LandingPage({ onAuth }) {
       <main>
         <section className="foodie-hero" id="home">
           <div className="foodie-hero-copy">
-            <div className="foodie-hot-pill"><span /> PRIVATE FINANCE WORKSPACE</div>
-            <h1>Simple, clear money management <em>for independent work.</em></h1>
-            <p>Track cash, invoices, reserves and runway in one calm workspace. Built for freelancers, creators and small independent businesses.</p>
+            <div className="foodie-hot-pill"><span /> HOT FINANCE</div>
+            <h1>Simple financial clarity <em>for your business.</em></h1>
+            <p>Track your cash, invoices, reserves and runway in one simple place. Make better money decisions without the finance clutter.</p>
             <div className="foodie-meta-row">
               <span><Clock3 size={12} /> Your own data</span>
               <span><Check size={12} /> No demo data</span>
             </div>
-            <button className="foodie-black-btn foodie-hero-btn" onClick={() => onAuth("signup")}>Start your workspace <ArrowUpRight size={14} /></button>
+            <button className="foodie-black-btn foodie-hero-btn" onClick={() => onAuth("signup")}>View my finances <ArrowUpRight size={14} /></button>
             <div className="foodie-author">
               <div className="foodie-avatar">CF</div>
-              <div><b>Built around your numbers</b><span>Every screen uses the data from your account.</span></div>
+              <div><b>Your financial workspace</b><span>Built around the numbers you enter.</span></div>
             </div>
           </div>
           <div className="foodie-hero-photo">
@@ -115,8 +115,8 @@ function LandingPage({ onAuth }) {
 
         <section className="foodie-section" id="recipes">
           <div className="foodie-centered-head">
-            <h2>Everything you need for your money</h2>
-            <p>A visual workspace for the recurring finance tasks behind an independent business.</p>
+            <h2>Simple and useful finance</h2>
+            <p>Understand cash, invoices and planning with the same clean visual flow from one screen to the next.</p>
           </div>
           <div className="foodie-recipe-grid">
             {cards.map(([image, title, tag, text, time], index) => (
@@ -138,8 +138,8 @@ function LandingPage({ onAuth }) {
 
         <section className="foodie-chef" id="about">
           <div className="foodie-chef-copy">
-            <h2>Everyone can understand the money behind the work</h2>
-            <p>No finance degree required. Freelancer CFO turns your real activity into a visual picture of cash, invoices, reserves, runway and next steps.</p>
+            <h2>Everyone can be a CFO in their own business</h2>
+            <p>You do the work. Freelancer CFO turns your real numbers into a clear picture of cash, reserves, invoices and runway — so the next decision feels simpler.</p>
             <button className="foodie-black-btn" onClick={() => onAuth("signup")}>Learn more <ArrowRight size={14} /></button>
           </div>
           <div className="foodie-chef-photo">
@@ -151,8 +151,8 @@ function LandingPage({ onAuth }) {
 
         <section className="foodie-section foodie-instagram" id="ai">
           <div className="foodie-centered-head">
-            <h2>Make the money side feel simple</h2>
-            <p>Clear screens, useful context and the same visual language from first transaction to next decision.</p>
+            <h2>Check out @freelancerCFO</h2>
+            <p>Cash, invoices, reserves and runway — presented with the same calm visual rhythm throughout your workspace.</p>
           </div>
           <div className="foodie-instagram-grid">
             {[
@@ -172,8 +172,8 @@ function LandingPage({ onAuth }) {
 
         <section className="foodie-newsletter">
           <div>
-            <h2>Financial clarity <br />in your inbox.</h2>
-            <p>Product updates and practical finance notes for independent professionals.</p>
+            <h2>Clarity to your <br />inbox.</h2>
+            <p>Product updates, practical finance notes and new tools for independent professionals.</p>
           </div>
           <div className="foodie-newsletter-form">
             <input type="email" placeholder="Your email address..." aria-label="Email address" />
