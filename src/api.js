@@ -13,7 +13,7 @@ async function request(path, options = {}, token = localStorage.getItem("cfo_tok
 }
 
 export const api = {
-  async login(email, password) {
+  async companySignup(companyName, name, email, password) {\n    const data = await request("/api/auth/company-signup", { method: "POST", body: JSON.stringify({ companyName, name, email, password }) }, null);\n    localStorage.setItem("cfo_token", data.token);\n    return data;\n  },\n  async login(email, password) {
     const data = await request("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }, null);
     localStorage.setItem("cfo_token", data.token);
     return data;
