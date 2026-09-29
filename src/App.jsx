@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Activity, AlertCircle, ArrowDownRight, ArrowUpRight, Bell, Bot, CalendarDays, Check,
   ChevronDown, CircleHelp, FileText, LogOut, Menu, MessageSquare, Plus, Search,
-  Send, Settings as SettingsIcon, TrendingDown, TrendingUp, Trash2, UserRound, Wallet,
+  Send, Settings as SettingsIcon, ShieldCheck, Target, TrendingDown, TrendingUp, Trash2, UserRound, Wallet,
   WalletCards, X
 } from "lucide-react";
 import {
