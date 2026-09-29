@@ -67,7 +67,7 @@ export function Help() {
       <section className="card"><div className="settings-title"><CircleHelp size={18}/><div><h3>Common questions</h3><p>Product guidance without the jargon.</p></div></div>
         <div className="faq-list">{questions.map(([q,a],i)=><div className="faq-item" key={q}><button onClick={()=>setOpen(open===i?null:i)}><span>{q}</span><span>{open===i?"−":"+"}</span></button>{open===i&&<p>{a}</p>}</div>)}</div>
       </section>
-      <section className="card support-card"><Mail size={19}/><h3>Support</h3><p>For account, organization, billing or privacy requests, use the support channel configured for your deployment.</p><Button variant="secondary" icon={Mail} onClick={() => window.location.href="mailto:support@example.com"}>Contact support</Button></section>
+      <section className="card support-card"><Mail size={19}/><h3>Support</h3><p>For account, organization, billing or privacy requests, use the support channel configured for your deployment.</p><p className="support-note">Use the public Contact page to reach the support channel configured for this deployment.</p></section>
     </div>
   </div>;
 }
