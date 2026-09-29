@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Building2, Check, Copy, FileText, LayoutDashboard, LogOut, Mail, Menu, ShieldCheck, Trash2, Users, UserRound, X, CreditCard } from "lucide-react";
 import { api } from "../../api";
 import { companyNavigation as sections } from "../../app/navigation";
-import { Badge, Button, EmptyState as Empty } from "../../components/ui/Primitives";
+import { Badge, Button, EmptyState as Empty, Kpi } from "../../components/ui/Primitives";
 
 export default function CompanyPortal({ user, onLogout }) {
   const [page, setPage] = useState("overview");
@@ -111,10 +111,10 @@ export default function CompanyPortal({ user, onLogout }) {
         {page === "overview" && <div className="page">
           <div className="hero-row"><div><p className="eyebrow">Company workspace</p><h1>{data.company.name}</h1><p>Manage your customer workspace, users, seats, and account health from one operational view.</p></div><Button icon={Users} onClick={() => setPage("team")}>Manage team</Button></div>
           <div className="kpi-grid">
-            <Metric label="Users" value={data.metrics.totalUsers} text="Active company members" icon={Users} />
-            <Metric label="Onboarding" value={progress + "%"} text="Members with finance setup complete" icon={Check} />
-            <Metric label="Pending invites" value={data.metrics.pendingInvites} text="Invitations awaiting signup" icon={Mail} />
-            <Metric label="Available seats" value={data.metrics.availableSeats} text={"Out of " + data.company.seatLimit + " seats"} icon={ShieldCheck} />
+            <Kpi label="Users" value={data.metrics.totalUsers} text="Active company members" icon={Users} />
+            <Kpi label="Onboarding" value={progress + "%"} text="Members with finance setup complete" icon={Check} />
+            <Kpi label="Pending invites" value={data.metrics.pendingInvites} text="Invitations awaiting signup" icon={Mail} />
+            <Kpi label="Available seats" value={data.metrics.availableSeats} text={"Out of " + data.company.seatLimit + " seats"} icon={ShieldCheck} />
           </div>
           <div className="company-grid">
             <section className="card"><div className="section-head"><div><h3>Team health</h3><p>User onboarding status</p></div></div>{data.members.length ? data.members.slice(0, 5).map(member => <div className="member-row" key={member._id}><span className="member-avatar">{String(member.name).slice(0, 1).toUpperCase()}</span><div><b>{member.name}</b><small>{member.email}</small></div><Badge tone={member.onboardingComplete ? "success" : "warning"}>{member.onboardingComplete ? "Ready" : "Setup needed"}</Badge></div>) : <Empty title="No users yet" text="Invite your first user to start the company workspace." />}</section>
