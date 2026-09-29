@@ -291,3 +291,8 @@ tr:last-child td{border-bottom:0}
 .auth-inline-choice{display:flex;justify-content:space-between;gap:10px}
 .auth-note{font-size:9px!important;color:#8e8a81!important;line-height:1.5;margin:0}
 @media(max-width:900px){.company-grid{grid-template-columns:1fr}}
+
+.filter-select{background:#fff;border:1px solid var(--border);color:#5f5b54;border-radius:999px;padding:8px 12px;font-size:9px;min-width:108px}
+.table-actions{display:flex;gap:5px;justify-content:flex-start}
+.table-actions button{border:1px solid var(--border);background:#fff;color:#67635b;border-radius:999px;padding:6px 8px;font-size:8px}
+.table-actions button:hover{background:#f3f1eb;color:#24221f}
