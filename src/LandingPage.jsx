@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, ArrowUpRight, Check, Clock3, Heart, Instagram, Menu, WalletCards } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, Clock3, Instagram, Menu, WalletCards } from "lucide-react";
 
 const webIcon = name => "https://api.iconify.design/" + name + ".svg?color=%23131312";
 
@@ -47,7 +47,6 @@ function Brand() {
 
 function LandingPage({ onAuth }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [saved, setSaved] = useState(() => Number(localStorage.getItem("cfo_saved_count") || 0));
   const [subscribed, setSubscribed] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState("");
 
@@ -64,12 +63,6 @@ function LandingPage({ onAuth }) {
     nodes.forEach(node => observer.observe(node));
     return () => observer.disconnect();
   }, []);
-
-  const saveFavorite = () => {
-    const next = saved ? 0 : 1;
-    setSaved(next);
-    localStorage.setItem("cfo_saved_count", String(next));
-  };
 
   const submitNewsletter = event => {
     event.preventDefault();
@@ -96,7 +89,6 @@ function LandingPage({ onAuth }) {
         </nav>
         <div className="foodie-header-right">
           <button className="foodie-social" aria-label="Open Instagram" onClick={() => window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer")}><Instagram size={14} /></button>
-          <button className={"foodie-social foodie-social-heart " + (saved ? "active" : "")} aria-label={saved ? "Remove saved item" : "Save this site"} onClick={saveFavorite}><Heart size={13} fill={saved ? "currentColor" : "none"} /></button>
           <button className="foodie-login" onClick={() => onAuth("login")}>Log in</button>
           <button className="foodie-black-btn" onClick={() => onAuth("signup")}>Get started</button>
         </div>
@@ -159,9 +151,6 @@ function LandingPage({ onAuth }) {
                 <div className="foodie-recipe-image">
                   <button className="foodie-recipe-open" onClick={() => onAuth("signup")} aria-label={"Open " + title}>
                     <img src={image} alt="" />
-                  </button>
-                  <button className="foodie-heart" onClick={saveFavorite} aria-label="Save this finance idea" title="Save">
-                    <Heart size={13} fill={saved ? "currentColor" : "none"} />
                   </button>
                 </div>
                 <h3>{title}</h3>
