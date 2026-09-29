@@ -4,9 +4,11 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import User from "../models/User.js";
 import FinancialProfile from "../models/FinancialProfile.js";
+import Company from "../models/Company.js";
+import CompanyInvite from "../models/CompanyInvite.js";
 import { env } from "../config.js";
 import { requireAuth } from "../middleware/auth.js";
-import { parse, loginSchema, onboardingSchema, resetPasswordSchema, resetRequestSchema, signupSchema } from "../utils/validate.js";
+import { parse, loginSchema, onboardingSchema, resetPasswordSchema, resetRequestSchema, signupSchema, companySignupSchema } from "../utils/validate.js";
 import { unauthorized, validation } from "../utils/errors.js";
 
 const router = express.Router();
@@ -22,6 +24,8 @@ function publicUser(user) {
     email: user.email,
     profession: user.profession,
     onboardingComplete: user.onboardingComplete,
+    role: user.role,
+    companyId: user.companyId,
   };
 }
 
@@ -29,8 +33,34 @@ router.post("/signup", async (req, res) => {
   const data = parse(signupSchema, req.body);
   const exists = await User.findOne({ email: data.email.toLowerCase() });
   if (exists) throw validation("An account with that email already exists.");
+
+  let companyId = null;
+  let invite = null;
+  if (data.inviteToken) {
+    const tokenHash = crypto.createHash("sha256").update(data.inviteToken).digest("hex");
+    invite = await CompanyInvite.findOne({
+      tokenHash,
+      status: "pending",
+      expiresAt: { $gt: new Date() },
+      email: data.email.toLowerCase(),
+    });
+    if (!invite) throw validation("That company invitation is invalid or expired.");
+    companyId = invite.companyId;
+  }
+
   const passwordHash = await bcrypt.hash(data.password, 12);
-  const user = await User.create({ ...data, email: data.email.toLowerCase(), passwordHash });
+  const user = await User.create({
+    name: data.name,
+    email: data.email.toLowerCase(),
+    passwordHash,
+    role: "user",
+    companyId,
+  });
+
+  if (invite) {
+    invite.status = "accepted";
+    await invite.save();
+  }
 
   res.status(201).json({ token: issueToken(user), user: publicUser(user) });
 });
@@ -40,6 +70,35 @@ router.post("/login", async (req, res) => {
   const user = await User.findOne({ email: data.email.toLowerCase() });
   if (!user || !(await bcrypt.compare(data.password, user.passwordHash))) throw unauthorized("Email or password is incorrect");
   res.json({ token: issueToken(user), user: publicUser(user) });
+});
+
+router.post("/company-signup", async (req, res) => {
+  const data = parse(companySignupSchema, req.body);
+  const exists = await User.findOne({ email: data.email.toLowerCase() });
+  if (exists) throw validation("An account with that email already exists.");
+
+  const passwordHash = await bcrypt.hash(data.password, 12);
+  const user = await User.create({
+    name: data.name,
+    email: data.email.toLowerCase(),
+    passwordHash,
+    role: "company_admin",
+    onboardingComplete: true,
+  });
+
+  const company = await Company.create({
+    name: data.companyName,
+    ownerUserId: user._id,
+  });
+
+  user.companyId = company._id;
+  await user.save();
+
+  res.status(201).json({
+    token: issueToken(user),
+    user: publicUser(user),
+    company: { id: company._id, name: company.name, plan: company.plan, seatLimit: company.seatLimit },
+  });
 });
 
 router.post("/forgot-password", async (req, res) => {
