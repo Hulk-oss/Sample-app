@@ -101,6 +101,10 @@ export default function PlatformPortal({ user, onLogout }) {
       <p className="modal-note">{finance.user.email} · {finance.user.role} · {finance.user.plan || "free"}</p>
       {finance.dashboard && <div className="kpi-grid"><Kpi label="Cash" value={"₹" + Number(finance.dashboard.cashBalance || 0).toLocaleString("en-IN")} sub="Stored finance context" icon={WalletCards} /><Kpi label="Receivables" value={"₹" + Number(finance.dashboard.receivables || 0).toLocaleString("en-IN")} sub="Outstanding invoices" icon={WalletCards} /></div>}
       <div className="owner-record-list"><b>Transactions: {finance.transactions.length}</b><b>Invoices: {finance.invoices.length}</b><span>Profile: {finance.profile ? "Configured" : "Not configured"}</span></div>
+      <div className="owner-detail-grid">
+        <section><h4>Recent transactions</h4>{finance.transactions.slice(0,8).map(row => <div className="owner-detail-row" key={row._id || row.id}><span>{new Date(row.date).toLocaleDateString("en-IN")}</span><b>{row.description}</b><strong>{row.type === "Expense" ? "−" : "+"}₹{Number(row.amount).toLocaleString("en-IN")}</strong></div>)}{!finance.transactions.length && <p>No transactions.</p>}</section>
+        <section><h4>Invoices</h4>{finance.invoices.slice(0,8).map(row => <div className="owner-detail-row" key={row._id || row.id}><span>{row.invoiceNumber}</span><b>{row.client}</b><strong>₹{Number(row.amount).toLocaleString("en-IN")}</strong></div>)}{!finance.invoices.length && <p>No invoices.</p>}</section>
+      </div>
     </div></div>}
   </div>;
 }
