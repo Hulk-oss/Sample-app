@@ -4,11 +4,12 @@ import Transaction from "../models/Transaction.js";
 import Invoice from "../models/Invoice.js";
 import FinancialProfile from "../models/FinancialProfile.js";
 import { requireAuth } from "../middleware/auth.js";
+import { requireUserPortal } from "../middleware/user.js";
 import { validation } from "../utils/errors.js";
 import { calculateDashboard, explainQuestion } from "../finance/engine.js";
 
 const router = express.Router();
-router.use(requireAuth);
+router.use(requireAuth, requireUserPortal);
 
 router.post("/ask", async (req, res) => {
   const question = String(req.body?.question || "").trim();
