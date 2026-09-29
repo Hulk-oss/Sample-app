@@ -7,5 +7,4 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET || "change-me-in-production",
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
   clientOrigin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
-  demoPassword: process.env.DEMO_PASSWORD || "Demo@12345",
 };
