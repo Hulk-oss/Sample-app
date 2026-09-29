@@ -45,7 +45,7 @@ function Brand() {
   return <div className="foodie-brand"><span className="foodie-brand-dot"><WalletCards size={13} /></span>Freelancer CFO</div>;
 }
 
-function LandingPage({ onAuth }) {
+function LandingPage({ onAuth, onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState("");
@@ -85,7 +85,8 @@ function LandingPage({ onAuth }) {
           <button onClick={() => jump("categories")}>Finance</button>
           <button onClick={() => jump("recipes")}>Planning</button>
           <button onClick={() => jump("ai")}>AI CFO</button>
-          <button onClick={() => jump("about")}>About us</button>
+          <button onClick={() => onNavigate?.("about")}>About us</button>
+          <button onClick={() => onNavigate?.("pricing")}>Pricing</button>
         </nav>
         <div className="foodie-header-right">
           <button className="foodie-social" aria-label="Open Instagram" onClick={() => window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer")}><Instagram size={14} /></button>
@@ -95,7 +96,11 @@ function LandingPage({ onAuth }) {
         <button className="foodie-menu-btn" onClick={() => setMenuOpen(v => !v)} aria-label="Menu"><Menu size={18} /></button>
         {menuOpen && (
           <div className="foodie-mobile-menu">
-            {["home", "categories", "recipes", "ai", "about"].map((id, i) => <button key={id} onClick={() => jump(id)}>{["Home", "Finance", "Planning", "AI CFO", "About us"][i]}</button>)}
+            {[
+              ["home","Home"],["categories","Finance"],["recipes","Planning"],["ai","AI CFO"]
+            ].map(([id,label]) => <button key={id} onClick={() => jump(id)}>{label}</button>)}
+            <button onClick={() => { onNavigate?.("about"); setMenuOpen(false); }}>About us</button>
+            <button onClick={() => { onNavigate?.("pricing"); setMenuOpen(false); }}>Pricing</button>
             <button onClick={() => { onAuth("login"); setMenuOpen(false); }}>Log in</button>
             <button onClick={() => { onAuth("signup"); setMenuOpen(false); }}>Get started</button>
           </div>
@@ -222,6 +227,11 @@ function LandingPage({ onAuth }) {
           <button onClick={() => jump("categories")}>Finance</button>
           <button onClick={() => jump("recipes")}>Planning</button>
           <button onClick={() => jump("ai")}>AI CFO</button>
+          <button onClick={() => onNavigate?.("pricing")}>Pricing</button>
+          <button onClick={() => onNavigate?.("privacy")}>Privacy</button>
+          <button onClick={() => onNavigate?.("security")}>Security</button>
+          <button onClick={() => onNavigate?.("terms")}>Terms</button>
+          <button onClick={() => onNavigate?.("contact")}>Contact</button>
           <button onClick={() => onAuth("login")}>Log in</button>
         </div>
         <div className="foodie-footer-bottom"><span>© 2026 Freelancer CFO</span><span>Private by design</span></div>
