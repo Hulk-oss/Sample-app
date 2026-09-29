@@ -30,6 +30,14 @@ app.use(rateLimit({
   legacyHeaders: false,
 }));
 
+app.get("/api", (req, res) => {
+  res.status(200).json({
+    ok: true,
+    service: "freelancer-cfo-api",
+    message: "API is reachable. Use /api/health for database status."
+  });
+});
+
 app.get("/api/health", (req, res) => {
   const states = ["disconnected", "connected", "connecting", "disconnecting"];
   const dbState = states[mongoose.connection.readyState] || "unknown";
