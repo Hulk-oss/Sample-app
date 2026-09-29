@@ -1,8 +1,7 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || (
-  typeof window !== "undefined" && /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)
-    ? "http://localhost:5000"
-    : ""
-);
+const isLocalHost = typeof window !== "undefined" && /^(localhost|127\\.0\\.0\\.1)$/.test(window.location.hostname);
+const API_BASE = isLocalHost
+  ? (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000")
+  : "";
 
 async function request(path, options = {}, token = localStorage.getItem("cfo_token")) {
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
