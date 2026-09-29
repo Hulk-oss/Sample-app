@@ -112,7 +112,8 @@ export default function PublicPages({ page, onNavigate, onBack, onAuth }) {
     return <Shell title="Privacy policy" intro="Your financial workspace belongs to the account that created it." active="privacy" onNavigate={onNavigate} onBack={onBack}>
       <div className="legal-copy">
         <h2>Account data</h2><p>We use account information and financial records to provide the product features requested by that account. User financial records are scoped to the authenticated user.</p>
-        <h2>Organization access</h2><p>Company administrators can manage company membership, invitations, seats and onboarding status. Employee financial records remain private to the employee account unless an explicit future product policy states otherwise.</p>
+        <h2>Organization access</h2><p>Company administrators can manage company membership, invitations, seats and onboarding status. Employee financial records remain private to the employee account.</p>
+        <h2>Privileged product access</h2><p>A designated platform owner account can access customer and organization records for product administration, support and development. Privileged inspections are authenticated and recorded in an administrative audit trail.</p>
         <h2>Security</h2><p>Passwords are stored as hashes, protected APIs use signed authentication tokens, and company operations are scoped to the authenticated organization.</p>
         <h2>Data requests</h2><p>Use the contact page to request account assistance, data correction or account deletion.</p>
       </div>
