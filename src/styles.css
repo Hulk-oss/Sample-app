@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
 /* Flowbase-inspired editorial UI layer */
 :root{
   --bg:#f6f4ef;
@@ -14,7 +14,7 @@
   --shadow:0 14px 40px rgba(33,30,22,.07);
 }
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{background:var(--bg);color:var(--text);font-family:"IBM Plex Sans",Arial,sans-serif}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
 .app-shell{min-height:100vh;background:var(--bg)}
@@ -1033,7 +1033,7 @@ tr:last-child td{border-bottom:0}
 
 /* Typography calibration to the Foodieland reference */
 .foodie-page{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-weight:400;
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
@@ -1045,21 +1045,21 @@ tr:last-child td{border-bottom:0}
   letter-spacing:-.045em;
 }
 .foodie-nav button,.foodie-login,.foodie-footer-nav button{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-size:10px;
   line-height:1;
   font-weight:500;
   letter-spacing:-.01em;
 }
 .foodie-black-btn,.foodie-outline-btn,.foodie-hot-pill{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-size:9px;
   line-height:1;
   font-weight:700;
   letter-spacing:-.01em;
 }
 .foodie-hero-copy h1{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-size:52px;
   line-height:1.02;
   letter-spacing:-.065em;
@@ -1067,7 +1067,7 @@ tr:last-child td{border-bottom:0}
   margin-top:17px;
 }
 .foodie-hero-copy p{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-size:10px;
   line-height:1.72;
   font-weight:400;
@@ -1086,65 +1086,65 @@ tr:last-child td{border-bottom:0}
   font-weight:400;
 }
 .foodie-section-head h2,.foodie-centered-head h2{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-size:31px;
   line-height:1.08;
   letter-spacing:-.055em;
   font-weight:700;
 }
 .foodie-centered-head p{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-size:9px;
   line-height:1.7;
   font-weight:400;
 }
 .foodie-category-card>b{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-size:9px;
   line-height:1;
   font-weight:600;
   letter-spacing:-.02em;
 }
 .foodie-recipe-card h3{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-size:14px;
   line-height:1.28;
   letter-spacing:-.035em;
   font-weight:600;
 }
 .foodie-recipe-card p{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-size:8px;
   line-height:1.55;
   font-weight:400;
 }
 .foodie-recipe-info{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-size:7px;
   font-weight:500;
 }
 .foodie-chef-copy h2{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-size:44px;
   line-height:1.01;
   letter-spacing:-.065em;
   font-weight:700;
 }
 .foodie-chef-copy p{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-size:10px;
   line-height:1.75;
   font-weight:400;
 }
 .foodie-newsletter h2{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-size:38px;
   line-height:1.02;
   letter-spacing:-.065em;
   font-weight:700;
 }
 .foodie-newsletter p,.foodie-newsletter-form input{
-  font-family:"Inter",sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
 }
 .foodie-newsletter p{
   font-size:9px;
@@ -1164,24 +1164,24 @@ tr:last-child td{border-bottom:0}
 
 /* Professional typography system */
 .foodie-page{
-  font-family:"Inter",Arial,sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-optical-sizing:auto;
   font-synthesis:none;
 }
 .foodie-brand{
-  font-family:"Inter Tight","Inter",Arial,sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-weight:700;
   letter-spacing:-.045em;
 }
 .foodie-nav button,.foodie-login,.foodie-footer-nav button,.foodie-meta-row span,.foodie-author span,.foodie-recipe-info,.foodie-centered-head p,.foodie-recipe-card p,.foodie-newsletter p{
-  font-family:"Inter",Arial,sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
 }
 .foodie-hero-copy h1,
 .foodie-section-head h2,
 .foodie-centered-head h2,
 .foodie-chef-copy h2,
 .foodie-newsletter h2{
-  font-family:"Inter Tight","Inter",Arial,sans-serif;
+  font-family:"IBM Plex Sans",Arial,sans-serif;
   font-weight:700;
   letter-spacing:-.055em;
 }
@@ -1189,8 +1189,8 @@ tr:last-child td{border-bottom:0}
 .foodie-section-head h2,.foodie-centered-head h2{font-size:32px;line-height:1.08}
 .foodie-chef-copy h2{font-size:45px;line-height:1.01}
 .foodie-newsletter h2{font-size:39px;line-height:1.02}
-.foodie-recipe-card h3{font-family:"Inter Tight","Inter",Arial,sans-serif;font-weight:600;letter-spacing:-.03em}
-.foodie-category-card>b{font-family:"Inter",Arial,sans-serif;font-weight:600}
+.foodie-recipe-card h3{font-family:"IBM Plex Sans",Arial,sans-serif;font-weight:600;letter-spacing:-.03em}
+.foodie-category-card>b{font-family:"IBM Plex Sans",Arial,sans-serif;font-weight:600}
 
 
 /* Readability + interaction pass */
@@ -1376,4 +1376,49 @@ tr:last-child td{border-bottom:0}
 }
 .foodie-social-heart.active{
   transform:scale(1.02);
+}
+
+
+/* Corporate identity typography */
+html, body, button, input, select, textarea{
+  font-family:"IBM Plex Sans",Arial,sans-serif;
+}
+body{
+  font-weight:400;
+  font-synthesis:none;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+h1,h2,h3,h4,h5,h6,
+.foodie-brand,
+.brand,
+.hero-row h1,
+.section-head h2,
+.section-head h3,
+.kpi-card strong,
+.safe-number,
+.runway-hero h2,
+.foodie-hero-copy h1,
+.foodie-section-head h2,
+.foodie-centered-head h2,
+.foodie-chef-copy h2,
+.foodie-newsletter h2,
+.foodie-recipe-card h3{
+  font-family:"IBM Plex Sans",Arial,sans-serif;
+  font-weight:700;
+}
+.foodie-hero-copy p,
+.foodie-centered-head p,
+.foodie-recipe-card p,
+.foodie-chef-copy p,
+.foodie-newsletter p,
+.foodie-author span,
+.foodie-meta-row span,
+.foodie-recipe-info,
+.foodie-nav button,
+.foodie-login,
+.foodie-footer-nav button,
+.foodie-category-card>b{
+  font-family:"IBM Plex Sans",Arial,sans-serif;
+  font-weight:400;
 }
