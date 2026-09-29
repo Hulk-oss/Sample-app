@@ -73,3 +73,16 @@ The reference-inspired visual system uses a warm light canvas, white rounded car
 - Database model: DATABASE.md
 - Deployment: DEPLOYMENT.md
 - Contributing: CONTRIBUTING.md
+
+
+## Frontend architecture
+
+The frontend uses explicit boundaries for shared UI, navigation, authentication, and the company workspace:
+
+- `src/app/` — application-level metadata and navigation
+- `src/components/ui/` — reusable presentation primitives
+- `src/features/auth/` — authentication workflow
+- `src/features/company/` — company-admin workspace
+- `src/App.jsx` — top-level orchestration and user finance workflow
+
+See `FRONTEND_ARCHITECTURE.md` and `DESIGN_SYSTEM.md` for the architectural rules.
