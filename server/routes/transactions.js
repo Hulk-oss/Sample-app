@@ -1,11 +1,12 @@
 import express from "express";
 import Transaction from "../models/Transaction.js";
 import { requireAuth } from "../middleware/auth.js";
+import { requireUserPortal } from "../middleware/user.js";
 import { parse, transactionSchema } from "../utils/validate.js";
 import { notFound } from "../utils/errors.js";
 
 const router = express.Router();
-router.use(requireAuth);
+router.use(requireAuth, requireUserPortal);
 
 router.get("/", async (req, res) => {
   const { type, category, from, to, q } = req.query;
