@@ -18,11 +18,11 @@ test("safe to spend follows the product formula", () => {
 });
 
 test("runway uses available cash divided by monthly expenses", () => {
-  assert.equal(calculateRunway({ availableCash: 90000, averageMonthlyExpenses: 30000 }), 597000 / 176000);
+  assert.equal(calculateRunway({ availableCash: 90000, averageMonthlyExpenses: 30000 }), 3);
 });
 
 test("tax reserve uses configured rate and income base", () => {
-  assert.equal(Math.round(calculateTaxReserve(659091, 0.22)), 145000);
+  assert.equal(Math.round(calculateTaxReserve(400000, 0.2)), 80000);
 });
 
 test("cash balance ignores future-dated transactions", () => {
