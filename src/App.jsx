@@ -456,7 +456,7 @@ function InvoiceModal({ close, notify, reload }) {
   async function save(event) {
     event.preventDefault();
     try {
-      await fetch("/api/invoices", { method:"POST", headers:{ "Content-Type":"application/json", Authorization:"Bearer "+localStorage.getItem("cfo_token") }, body: JSON.stringify({ ...form, amount:Number(form.amount) }) }).then(async r => { const body=await r.json(); if(!r.ok) throw new Error(body?.error?.message||"Unable to create invoice"); return body; });
+      await api.createInvoice({ ...form, amount: Number(form.amount) });
       close(); await reload(); notify("Invoice created");
     } catch (error) { notify(error.message); }
   }
