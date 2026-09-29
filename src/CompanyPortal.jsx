@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Building2, Check, Copy, LayoutDashboard, LogOut, Mail, Menu, Settings, ShieldCheck, Sparkles, Trash2, Users, UserRound, X } from "lucide-react";
+import { Building2, Check, Copy, FileText, LayoutDashboard, LogOut, Mail, Menu, Settings, ShieldCheck, Trash2, Users, UserRound, X } from "lucide-react";
 import { api } from "./api";
 
 const sections = [
@@ -17,7 +17,7 @@ function Metric({ label, value, text, icon: Icon }) {
   return <div className="kpi-card"><div className="kpi-top"><span>{label}</span><span className="icon-box"><Icon size={15} /></span></div><strong>{value}</strong><small>{text}</small></div>;
 }
 function Empty({ title, text }) {
-  return <div className="empty-state"><div className="empty-icon"><Sparkles size={16} /></div><h3>{title}</h3><p>{text}</p></div>;
+  return <div className="empty-state"><div className="empty-icon"><FileText size={16} /></div><h3>{title}</h3><p>{text}</p></div>;
 }
 
 export default function CompanyPortal({ user, onLogout }) {
