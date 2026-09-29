@@ -160,7 +160,7 @@ function App() {
   if (user?.role === "company_admin") return <CompanyPortal user={user} onLogout={logout} />;
   if (onboard || !finance) {
     if (loading && user && !onboard) {
-      return <div className="auth-shell landing-auth-overlay"><div className="auth-card"><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div><p>Loading your private workspace…</p></div></div>;
+      return <div className="auth-shell"><div className="auth-card"><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div><p>Loading your private workspace…</p></div></div>;
     }
     return <Onboarding finish={finishOnboarding} />;
   }
@@ -564,7 +564,7 @@ function Auth({ initialMode = "login", close, setAuth, onAuthenticated, notify }
       ? "Join the company using the invitation link you received."
       : "Your financial data stays tied to the account you sign in with.";
 
-  return <div className="auth-shell">
+  return <div className="auth-shell landing-auth-overlay">
     <form className="auth-card" onSubmit={mode === "login" ? event => { event.preventDefault(); login(); } : submit}>
       <div className="auth-modal-top"><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div>{close && <button type="button" className="auth-close" onClick={close}><X size={17} /></button>}</div>
       <div className="auth-title"><p className="eyebrow">{mode === "company-signup" ? "Company control center" : "Private financial workspace"}</p><h1>{title}</h1><p>{description}</p></div>
