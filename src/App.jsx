@@ -3,7 +3,7 @@ import {
   Activity, AlertCircle, ArrowDownRight, ArrowUpRight, Bell, Bot, CalendarDays, Check,
   ChevronDown, CircleHelp, CreditCard, FileText, LayoutDashboard, LogOut, Menu,
   MessageSquare, Plus, ReceiptText, Search, Send, Settings as SettingsIcon, ShieldCheck,
-  Sparkles, Target, TrendingDown, TrendingUp, UserRound, Wallet, X
+  Sparkles, Target, TrendingDown, TrendingUp, Trash2, UserRound, Wallet, X
 } from "lucide-react";
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis
