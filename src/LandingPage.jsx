@@ -47,6 +47,9 @@ function Brand() {
 
 function LandingPage({ onAuth }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [saved, setSaved] = useState(() => Number(localStorage.getItem("cfo_saved_count") || 0));
+  const [subscribed, setSubscribed] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
 
   useEffect(() => {
     const nodes = document.querySelectorAll(".foodie-reveal");
@@ -61,6 +64,19 @@ function LandingPage({ onAuth }) {
     nodes.forEach(node => observer.observe(node));
     return () => observer.disconnect();
   }, []);
+
+  const saveFavorite = () => {
+    const next = saved ? 0 : 1;
+    setSaved(next);
+    localStorage.setItem("cfo_saved_count", String(next));
+  };
+
+  const submitNewsletter = event => {
+    event.preventDefault();
+    if (!newsletterEmail.trim()) return;
+    localStorage.setItem("cfo_newsletter_email", newsletterEmail.trim());
+    setSubscribed(true);
+  };
 
   const jump = id => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -140,10 +156,14 @@ function LandingPage({ onAuth }) {
           <div className="foodie-recipe-grid">
             {cards.map(([image, title, tag, text, time], index) => (
               <article className="foodie-recipe-card foodie-reveal-item" key={title}>
-                <button className="foodie-recipe-image" onClick={() => onAuth("signup")} aria-label={title}>
-                  <img src={image} alt="" />
-                  <span className="foodie-heart"><Heart size={13} /></span>
-                </button>
+                <div className="foodie-recipe-image">
+                  <button className="foodie-recipe-open" onClick={() => onAuth("signup")} aria-label={"Open " + title}>
+                    <img src={image} alt="" />
+                  </button>
+                  <button className="foodie-heart" onClick={saveFavorite} aria-label="Save this finance idea" title="Save">
+                    <Heart size={13} fill={saved ? "currentColor" : "none"} />
+                  </button>
+                </div>
                 <h3>{title}</h3>
                 <p>{text}</p>
                 <div className="foodie-recipe-info">
@@ -180,7 +200,7 @@ function LandingPage({ onAuth }) {
               [photos.notes, "Reserves", "Know what stays protected."],
               [photos.planner, "Runway", "Know what comes next."],
             ].map(([image, title, text]) => (
-              <button className="foodie-instagram-tile foodie-reveal-item" key={title} onClick={() => onAuth("signup")}>
+              <button className="foodie-instagram-tile foodie-reveal-item" key={title} onClick={() => onAuth("signup")} aria-label={"Open " + title}>
                 <img src={image} alt="" />
                 <div className="foodie-instagram-caption"><b>{title}</b><span>{text}</span></div>
               </button>
@@ -194,10 +214,16 @@ function LandingPage({ onAuth }) {
             <h2>Clarity to your <br />inbox.</h2>
             <p>Product updates, practical finance notes and new tools for independent professionals.</p>
           </div>
-          <div className="foodie-newsletter-form">
-            <input type="email" placeholder="Your email address..." aria-label="Email address" />
-            <button className="foodie-black-btn" onClick={() => onAuth("signup")}>Subscribe <ArrowRight size={13} /></button>
-          </div>
+          <form className={"foodie-newsletter-form " + (subscribed ? "is-subscribed" : "")} onSubmit={submitNewsletter}>
+            {!subscribed ? (
+              <>
+                <input type="email" placeholder="Your email address..." aria-label="Email address" required value={newsletterEmail} onChange={event => setNewsletterEmail(event.target.value)} />
+                <button className="foodie-black-btn" type="submit">Subscribe <ArrowRight size={13} /></button>
+              </>
+            ) : (
+              <div className="foodie-newsletter-success"><Check size={14} /> You're on the list.</div>
+            )}
+          </form>
         </section>
       </main>
 
