@@ -18,6 +18,7 @@ import Auth from "./features/auth/Auth";
 import { userNavigation as nav } from "./app/navigation";
 import { filterUserNavigation, isUserFeatureEnabled } from "./pricing";
 import { Badge, Button, ChartCard, EmptyState, Head, Kpi } from "./components/ui/Primitives";
+import { Billing, Help, Notifications } from "./features/account/AccountPages";
 
 const money = formatINR;
 
@@ -187,6 +188,9 @@ function App() {
         {page === "runway" && <Runway finance={finance} />}
         {page === "ai" && <AICFO finance={finance} overdue={overdue} invoices={invoices} notify={notify} />}
         {page === "settings" && <Settings user={user} finance={finance} reload={loadWorkspace} notify={notify} />}
+        {page === "billing" && <Billing user={user} setPage={setPage} />}
+        {page === "notifications" && <Notifications finance={finance} overdue={overdue} setPage={setPage} />}
+        {page === "help" && <Help />}
       </div>
     </main>
 
