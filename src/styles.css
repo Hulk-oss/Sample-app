@@ -844,9 +844,6 @@ tr:last-child td{border-bottom:0}
 .recipe-tone-4{background:#f8f0df}.recipe-tone-5{background:#e9f6ef}.recipe-tone-6{background:#fff0e9}
 .foodie-recipe-image:before{content:"";position:absolute;width:145px;height:145px;border-radius:50%;background:rgba(255,255,255,.48);top:-45px;right:-35px}
 .foodie-recipe-icon{width:75px;height:75px;padding:19px;background:#fff;border-radius:22px;box-shadow:0 15px 30px rgba(0,0,0,.05);position:relative;z-index:1}
-.foodie-heart{
-  position:absolute;right:10px;top:10px;width:27px;height:27px;border-radius:50%;background:#fff;display:grid;place-items:center;z-index:2
-}
 .foodie-recipe-mark{
   position:absolute;left:10px;top:10px;border-radius:999px;background:#fff;padding:5px 7px;font-size:7px;font-weight:800
 }
@@ -985,7 +982,6 @@ tr:last-child td{border-bottom:0}
 .foodie-recipe-image img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}
 .foodie-recipe-image:hover img{transform:scale(1.035)}
 .foodie-recipe-image:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.04),transparent 48%,rgba(0,0,0,.05))}
-.foodie-heart{z-index:3}
 .foodie-recipe-card h3{font-size:13px;margin:10px 2px 5px}
 .foodie-recipe-card p{font-size:8px;line-height:1.55;color:#858585;margin:0 2px 8px;min-height:25px}
 .foodie-recipe-info{font-size:7px}
@@ -1306,7 +1302,6 @@ tr:last-child td{border-bottom:0}
 
 /* Button completion + web-card interactions */
 .foodie-social{position:relative}
-.foodie-social-heart.active{background:#111;color:#fff;border-radius:50%}
 .foodie-recipe-image{
   border:0;
 }
@@ -1324,7 +1319,7 @@ tr:last-child td{border-bottom:0}
   cursor:pointer;
 }
 .foodie-recipe-open:focus-visible,
-.foodie-heart:focus-visible,
+,
 .foodie-social:focus-visible,
 .foodie-black-btn:focus-visible,
 .foodie-outline-btn:focus-visible,
@@ -1335,29 +1330,6 @@ tr:last-child td{border-bottom:0}
   outline:2px solid #111;
   outline-offset:3px;
 }
-.foodie-heart{
-  position:absolute;
-  right:10px;
-  top:10px;
-  width:29px;
-  height:29px;
-  padding:0;
-  margin:0;
-  border:0;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  background:#fff;
-  color:#111;
-  z-index:4;
-  cursor:pointer;
-  transition:transform .25s var(--motion),background-color .25s ease,color .25s ease,box-shadow .25s ease;
-}
-.foodie-heart:hover{
-  transform:scale(1.09);
-  box-shadow:0 7px 16px rgba(0,0,0,.10);
-}
-.foodie-heart:active{transform:scale(.95)}
 .foodie-newsletter-success{
   display:flex;
   align-items:center;
@@ -1373,9 +1345,6 @@ tr:last-child td{border-bottom:0}
 .foodie-newsletter-form.is-subscribed{
   background:#eff8f1;
   border:1px solid #dcecdf;
-}
-.foodie-social-heart.active{
-  transform:scale(1.02);
 }
 
 
@@ -1974,9 +1943,6 @@ button:disabled{
 .table-action,
 .invoice-actions button,
 .foodie-social,
-.foodie-heart{
-  will-change:transform;
-}
 .icon-button:hover,
 .table-action:hover,
 .invoice-actions button:hover{
