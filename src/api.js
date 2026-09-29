@@ -7,12 +7,28 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || (
 async function request(path, options = {}, token = localStorage.getItem("cfo_token")) {
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
   if (token) headers.Authorization = "Bearer " + token;
-  const response = await fetch(API_BASE + path, { ...options, headers });
-  const payload = await response.json().catch(() => ({}));
+
+  let response;
+  try {
+    response = await fetch(API_BASE + path, { ...options, headers });
+  } catch (error) {
+    const host = API_BASE || window.location.origin;
+    throw new Error("Cannot reach the backend at " + host + ". Start the API server or configure the production backend.");
+  }
+
+  const raw = await response.text();
+  let payload = {};
+  try {
+    payload = raw ? JSON.parse(raw) : {};
+  } catch {
+    payload = {};
+  }
+
   if (!response.ok) {
-    const message = payload?.error?.message || "Request failed";
+    const message = payload?.error?.message || ("Request failed (" + response.status + ")");
     throw new Error(message);
   }
+
   return payload;
 }
 
