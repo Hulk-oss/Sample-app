@@ -211,7 +211,9 @@ function App() {
       </button>
     )}</div>
 
-    {modal?.type === "transaction" && <TransactionModal close={() => setModal(null)} notify={notify} reload={loadWorkspace} />}\n    {modal?.type === "invoice" && <InvoiceModal close={() => setModal(null)} notify={notify} reload={loadWorkspace} />}\n    {modal?.type === "reminder" && <Reminder invoice={modal.invoice} close={() => setModal(null)} notify={notify} />}
+    {modal?.type === "transaction" && <TransactionModal close={() => setModal(null)} notify={notify} reload={loadWorkspace} />}
+    {modal?.type === "invoice" && <InvoiceModal close={() => setModal(null)} notify={notify} reload={loadWorkspace} />}
+    {modal?.type === "reminder" && <Reminder invoice={modal.invoice} close={() => setModal(null)} notify={notify} />}
     {toast && <div className="toast"><Check size={14} />{toast}</div>}
   </div>;
 }
