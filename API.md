@@ -69,3 +69,23 @@ The server builds trusted financial context from the authenticated user's record
     }
 
 Financial calculations are never accepted from client totals as a source of truth.
+
+
+## Pricing enforcement
+
+Individual accounts use `free` or `pro`. Analytics and AI endpoints enforce these entitlements server-side.
+
+Organization employees inherit feature access from their organization's `starter`, `growth`, or `scale` plan. Seat limits are enforced when creating invitations.
+
+## Platform owner
+
+Protected by the `platform_owner` role:
+
+- GET /api/admin/overview
+- GET /api/admin/users
+- GET /api/admin/companies
+- GET /api/admin/users/:id/finance
+- GET /api/admin/companies/:id/members
+- GET /api/admin/audit
+
+Finance inspection is restricted to the platform owner role and recorded in `AdminAudit`.
