@@ -45,7 +45,20 @@ export default function CompanyPortal({ user, onLogout }) {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    let active = true;
+    let timer;
+
+    load();
+    timer = window.setInterval(() => {
+      if (active) load();
+    }, 15000);
+
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, []);
 
   if (!data) {
     return <div className="auth-shell"><div className="auth-card"><div className="brand"><span className="brand-mark"><Building2 size={16} /></span>Company workspace</div><p>Loading your company workspace…</p></div></div>;
