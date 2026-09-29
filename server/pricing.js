@@ -18,19 +18,19 @@ export const organizationPlans = {
     id: "starter",
     name: "Organization Starter",
     seatLimit: 5,
-    features: ["companyOverview", "team", "invites", "companySettings", "employeeOnboarding"],
+    features: ["dashboard", "transactions", "invoices", "companyOverview", "team", "invites", "companySettings", "employeeOnboarding"],
   },
   growth: {
     id: "growth",
     name: "Organization Growth",
     seatLimit: 25,
-    features: ["companyOverview", "team", "invites", "companySettings", "employeeOnboarding", "advancedAdministration"],
+    features: ["dashboard", "transactions", "invoices", "cashflow", "taxReserve", "runway", "companyOverview", "team", "invites", "companySettings", "employeeOnboarding", "advancedAdministration"],
   },
   scale: {
     id: "scale",
     name: "Organization Scale",
     seatLimit: 100,
-    features: ["companyOverview", "team", "invites", "companySettings", "employeeOnboarding", "advancedAdministration", "prioritySupport"],
+    features: ["dashboard", "transactions", "invoices", "cashflow", "taxReserve", "runway", "aiCfo", "companyOverview", "team", "invites", "companySettings", "employeeOnboarding", "advancedAdministration", "prioritySupport"],
   },
 };
 
