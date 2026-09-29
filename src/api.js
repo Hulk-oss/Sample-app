@@ -18,8 +18,8 @@ export const api = {
     localStorage.setItem("cfo_token", data.token);
     return data;
   },
-  async signup(name, email, password) {
-    const data = await request("/api/auth/signup", { method: "POST", body: JSON.stringify({ name, email, password }) }, null);
+  async signup(name, email, password, inviteToken) {
+    const data = await request("/api/auth/signup", { method: "POST", body: JSON.stringify({ name, email, password, ...(inviteToken ? { inviteToken } : {}) }) }, null);
     localStorage.setItem("cfo_token", data.token);
     return data;
   },
