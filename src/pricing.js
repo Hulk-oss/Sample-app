@@ -1,6 +1,6 @@
 const individualFeatures = {
-  free: new Set(["dashboard", "transactions", "invoices", "settings"]),
-  pro: new Set(["dashboard", "transactions", "invoices", "cashflow", "tax", "runway", "ai", "settings"]),
+  free: new Set(["dashboard", "transactions", "invoices", "settings", "billing", "notifications", "help"]),
+  pro: new Set(["dashboard", "transactions", "invoices", "cashflow", "tax", "runway", "ai", "settings", "billing", "notifications", "help"]),
 };
 
 const organizationFeatures = {
