@@ -86,3 +86,19 @@ The frontend uses explicit boundaries for shared UI, navigation, authentication,
 - `src/App.jsx` — top-level orchestration and user finance workflow
 
 See `FRONTEND_ARCHITECTURE.md` and `DESIGN_SYSTEM.md` for the architectural rules.
+
+
+## Pricing model
+
+Freelancer CFO supports two commercial paths:
+
+- Individual: Free and Pro.
+- Organization: Starter, Growth and Scale.
+
+Individual plan features are enforced server-side. Organization plans add seat capacity and administrative features; company administrators manage membership and onboarding while employee finance remains user-scoped.
+
+## Platform owner
+
+A dedicated `platform_owner` role provides the product owner with an authenticated administrative console for product operations, account inspection and development support. Privileged finance inspection is recorded in an audit collection.
+
+Configure `PLATFORM_OWNER_EMAIL` in the deployment environment and protect that account with a strong password.
