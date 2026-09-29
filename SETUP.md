@@ -4,39 +4,58 @@
 
 - Node.js 18+
 - npm 9+
+- MongoDB 6+ or MongoDB Atlas
 - Modern browser
 
 ## Install
 
-```bash
-git clone https://github.com/Hulk-oss/Sample-app.git
-cd Sample-app
-npm install
-```
+    git clone https://github.com/Hulk-oss/Sample-app.git
+    cd Sample-app
+    npm install
+
+Create .env from .env.example.
 
 ## Development
 
-```bash
-npm run dev
-```
+Start frontend and API together:
 
-## Production build
+    npm run dev:full
 
-```bash
-npm run build
-npm run preview
-```
+Or separately:
 
-## Demo behavior
+    npm run dev
+    npm run dev:server
 
-Authentication, onboarding, CRUD actions, settings, and AI responses use browser state. No secret keys are required.
+## Build and test
 
-## Source map
+    npm test
+    npm run build
 
-- `src/App.jsx`: product screens and interactions
-- `src/styles.css`: visual system and responsive behavior
-- `src/data.js`: demo records
-- `src/finance.js`: deterministic calculations
-- `src/main.jsx`: React entry
+## First-user flow
 
-For production, move persistence and critical calculations to a trusted backend.
+1. Create a new account.
+2. Complete the four onboarding steps with your own financial information.
+3. Add your own transactions.
+4. Add your own invoices.
+5. Review Safe to Spend, Cash Flow, Tax Reserve, and Runway.
+6. Ask AI CFO questions about your stored numbers.
+
+There is no demo account and there is no seed command. A new account starts without customer financial records.
+
+## Environment
+
+    PORT=5000
+    MONGODB_URI=mongodb://127.0.0.1:27017/freelancer_cfo
+    JWT_SECRET=replace-with-a-long-random-secret
+    JWT_EXPIRES_IN=7d
+    CLIENT_ORIGIN=http://localhost:5173
+
+## Project map
+
+- src/App.jsx: product screens, entry forms, empty states, responsive shell
+- src/styles.css: reference-inspired visual system and responsive behavior
+- src/api.js: frontend API client
+- server/routes: auth, financial, analytics, AI
+- server/finance/engine.js: trusted calculations
+- server/models: MongoDB models
+- tests/finance.test.js: finance formula tests
