@@ -6,6 +6,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { requireCompanyAdmin } from "../middleware/company.js";
 import { parse, companyInviteSchema } from "../utils/validate.js";
 import { validation, notFound } from "../utils/errors.js";
+import { getCompanyPlan } from "../pricing.js";
 
 const router = express.Router();
 router.use(requireAuth, requireCompanyAdmin);
@@ -13,7 +14,7 @@ router.use(requireAuth, requireCompanyAdmin);
 router.get("/overview", async (req, res) => {
   const [members, pendingInvites] = await Promise.all([
     User.find({ companyId: req.company._id, role: "user" })
-      .select("name email profession onboardingComplete createdAt")
+      .select("name email profession onboardingComplete createdAt lastLoginAt")
       .sort({ createdAt: -1 })
       .lean(),
     CompanyInvite.find({ companyId: req.company._id, status: "pending", expiresAt: { $gt: new Date() } })
@@ -30,6 +31,7 @@ router.get("/overview", async (req, res) => {
       plan: req.company.plan,
       seatLimit: req.company.seatLimit,
       status: req.company.status,
+      features: getCompanyPlan(req.company).features,
     },
     metrics: {
       totalUsers: members.length,
