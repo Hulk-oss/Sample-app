@@ -1,69 +1,75 @@
 # Freelancer CFO
 
-A premium dark SaaS/fintech MVP for independent professionals who need a clear view of cash, reserves, receivables, runway, and next actions.
+A user-owned finance workspace for independent professionals, redesigned around the calm editorial structure and whitespace of the Flowbase Cooking Template reference. The reference is visual inspiration only; all content and workflows are purpose-built for freelancer finance.
 
-## Scope
+## User data model
 
-- Sign up, login, forgot password, demo account
-- Multi-step financial onboarding
-- Safe to Spend dashboard
-- Transactions and invoice workflows
-- Cash-flow analytics with estimated forecasts
-- Tax reserve planning estimate
+There is no demo account, seeded customer, preset transaction history, preset invoices, or hardcoded financial profile in the application.
+
+Every user's numbers come from:
+- account signup/login
+- financial onboarding
+- their own transactions
+- their own invoices
+- their own financial assumptions
+
+The application starts empty for each new account.
+
+## Features
+
+- Sign up and login
+- Password reset API
+- Multi-step onboarding for user financial assumptions
+- Safe to Spend
+- Transactions with real entry form and CRUD API
+- Invoices with real creation, payment status, and reminder draft flow
+- Cash-flow actual/forecast analytics
+- Tax reserve planning
 - Runway scenarios
-- AI CFO conversation UI
-- Settings and responsive mobile navigation
-- Attention states for overdue invoices, low runway, and negative-pressure scenarios
-
-The MVP intentionally excludes banking, UPI, lending, investments, insurance, GST filing, payment processing, and other out-of-scope financial services.
+- AI CFO backed by the signed-in user's deterministic finance context
+- Settings for user-specific assumptions
+- Responsive editorial UI
 
 ## Stack
 
-React + Vite + Recharts + Lucide React + CSS.
+React + Vite + Recharts + Lucide React + CSS
+
+Express + MongoDB/Mongoose + JWT + bcryptjs + Zod + Helmet + rate limiting
 
 ## Run
 
-```bash
-npm install
-npm run dev
-```
+    npm install
 
-## Core formula
+Create .env from .env.example, start MongoDB, then run:
 
-`safe_to_spend = cash_balance - tax_reserve - upcoming_expenses - emergency_reserve`
+    npm run dev:full
 
-Demo:
+Frontend: http://localhost:5173
+API: http://localhost:5000
 
-- Cash ₹7.42L
-- Tax reserve ₹1.45L
-- Upcoming expenses ₹1.15L
-- Emergency reserve ₹1.50L
-- Safe to spend ₹3.32L
-- Receivables ₹3.20L
-- Overdue invoices ₹2.10L across 3 invoices
+## Data ownership
 
-## AI boundary
+Every financial document includes userId and every protected route queries by the authenticated user's ID. No shared financial records are used.
 
-```mermaid
-flowchart LR
- U[User question] --> D[Stored user data]
- D --> F[Deterministic finance engine]
- F --> R[Trusted calculation results]
- R --> A[AI explanation layer]
- A --> O[Answer + key numbers + next action]
-```
+## Core formulas
 
-Critical numbers come from deterministic calculations. The AI layer explains stored results and must not invent data or independently replace critical calculations.
+safe_to_spend = cash_balance - tax_reserve - upcoming_expenses - emergency_reserve
+
+runway_months = available_cash / average_monthly_expenses
+
+tax_reserve = relevant_income × configurable_tax_rate
+
+Critical values are calculated by the server-side finance engine.
+
+## UI direction
+
+The reference-inspired visual system uses a warm light canvas, white rounded cards, large editorial headings, pill controls, simple navigation, and generous whitespace. Financial numbers remain the primary visual content rather than copying the source template's cooking content.
 
 ## Documentation
 
-- [Architecture](ARCHITECTURE.md)
-- [API contract](API.md)
-- [Setup](SETUP.md)
-- [Database model](DATABASE.md)
-- [Deployment](DEPLOYMENT.md)
-- [Contributing](CONTRIBUTING.md)
-
-## Navigation
-
-Dashboard → Transactions → Invoices → Cash Flow → Tax Reserve → Runway → AI CFO → Settings
+- Architecture: ARCHITECTURE.md
+- API contract: API.md
+- Setup: SETUP.md
+- Database model: DATABASE.md
+- Deployment: DEPLOYMENT.md
+- Contributing: CONTRIBUTING.md
