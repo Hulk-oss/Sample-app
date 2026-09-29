@@ -16,7 +16,7 @@ import LandingPage from "./LandingPage";
 import PublicPages from "./pages/PublicPages";
 import Auth from "./features/auth/Auth";
 import { userNavigation as nav } from "./app/navigation";
-import { filterUserNavigation } from "./pricing";
+import { filterUserNavigation, isUserFeatureEnabled } from "./pricing";
 import { Badge, Button, ChartCard, EmptyState, Head, Kpi } from "./components/ui/Primitives";
 
 const money = formatINR;
