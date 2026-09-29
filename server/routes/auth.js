@@ -27,6 +27,7 @@ function publicUser(user) {
     role: user.role,
     companyId: user.companyId,
     plan: user.plan,
+    lastLoginAt: user.lastLoginAt,
   };
 }
 
@@ -73,8 +74,9 @@ router.post("/login", async (req, res) => {
   if (!user || !(await bcrypt.compare(data.password, user.passwordHash))) throw unauthorized("Email or password is incorrect");
   if (env.platformOwnerEmail && user.email === env.platformOwnerEmail && user.role !== "platform_owner") {
     user.role = "platform_owner";
-    await user.save();
   }
+  user.lastLoginAt = new Date();
+  await user.save();
   res.json({ token: issueToken(user), user: publicUser(user) });
 });
 
