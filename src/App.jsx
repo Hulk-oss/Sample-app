@@ -16,6 +16,7 @@ import LandingPage from "./LandingPage";
 import PublicPages from "./pages/PublicPages";
 import Auth from "./features/auth/Auth";
 import { userNavigation as nav } from "./app/navigation";
+import { filterUserNavigation } from "./pricing";
 import { Badge, Button, ChartCard, EmptyState, Head, Kpi } from "./components/ui/Primitives";
 
 const money = formatINR;
@@ -48,7 +49,7 @@ function App() {
     setLoading(true);
     try {
       const me = await api.me();
-      setUser(me.user);
+      setUser({ ...me.user, companyPlan: me.company?.plan || null });
       if (me.user.role === "company_admin") { setOnboard(false); return; }
       if (!me.user.onboardingComplete || !me.profile) {
         setOnboard(true);
@@ -144,6 +145,7 @@ function App() {
     finance, user, transactions, invoices, overdue, cashData, live: true,
     setPage, notify, reload: loadWorkspace, loading
   };
+  const activeNav = filterUserNavigation(nav, user);
 
   return <div className="app-shell">
     <aside className={"sidebar " + (sidebar ? "open" : "")}>
@@ -153,7 +155,7 @@ function App() {
         <div><b>{user?.name}</b><small>{user?.profession || "Independent"}</small></div>
         <ChevronDown size={13} />
       </div>
-      <nav>{nav.map(([key, label, Icon]) =>
+      <nav>{activeNav.map(([key, label, Icon]) =>
         <button className={page === key ? "active" : ""} key={key} onClick={() => { setPage(key); setSidebar(false); }}>
           <Icon size={15} />{label}{key === "ai" && <i />}
         </button>
@@ -164,7 +166,7 @@ function App() {
     <main className="main">
       <header className="topbar">
         <button className="mobile-menu" onClick={() => setSidebar(!sidebar)}><Menu size={19} /></button>
-        <b>{nav.find(row => row[0] === page)?.[1]}</b>
+        <b>{activeNav.find(row => row[0] === page)?.[1] || "Overview"}</b>
         <div className="top-actions">
           <select><option>90 days</option><option>This month</option><option>6 months</option></select>
           <button className="icon-button"><Bell size={15} /><i /></button>
@@ -184,7 +186,7 @@ function App() {
       </div>
     </main>
 
-    <div className="mobile-nav">{nav.slice(0, 5).map(([key, label, Icon]) =>
+    <div className="mobile-nav">{activeNav.slice(0, 5).map(([key, label, Icon]) =>
       <button className={page === key ? "active" : ""} key={key} onClick={() => setPage(key)}>
         <Icon size={16} /><span>{label.split(" ")[0]}</span>
       </button>
