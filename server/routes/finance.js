@@ -3,12 +3,13 @@ import FinancialProfile from "../models/FinancialProfile.js";
 import Transaction from "../models/Transaction.js";
 import Invoice from "../models/Invoice.js";
 import { requireAuth } from "../middleware/auth.js";
+import { requireUserPortal } from "../middleware/user.js";
 import { calculateDashboard, buildMonthlyCashFlow, buildForecast, calculateRunway, calculateTaxReserve, getAverageMonthlyExpenses, getAverageMonthlyIncome } from "../finance/engine.js";
 import { parse, profileSchema } from "../utils/validate.js";
 import { validation } from "../utils/errors.js";
 
 const router = express.Router();
-router.use(requireAuth);
+router.use(requireAuth, requireUserPortal);
 
 async function getContext(userId, now = new Date()) {
   const [profile, transactions, invoices] = await Promise.all([
