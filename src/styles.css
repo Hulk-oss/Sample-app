@@ -2465,3 +2465,135 @@ body,
     padding:24px;
   }
 }
+
+
+/* =========================================================
+   Human-made visual cleanup
+   Remove glossy / AI-looking effects while preserving layout
+   ========================================================= */
+
+/* Solid product surfaces instead of glassmorphism */
+.app-shell .card,
+.app-shell .kpi-card,
+.app-shell .chart-card,
+.app-shell .chat-card,
+.app-shell .settings-card,
+.app-shell .safe-card,
+.app-shell .table-wrap{
+  background:#fff;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+.kpi-card::after,
+.card::after,
+.safe-card::after,
+.chart-card::after,
+.chat-card::after,
+.foodie-category-card::after,
+.foodie-recipe-card::after,
+.foodie-overlay-card::after,
+.foodie-instagram-tile::after{
+  display:none !important;
+}
+
+/* No synthetic light sweep on controls */
+.button::before,
+.foodie-black-btn::before,
+.foodie-outline-btn::before{
+  display:none !important;
+}
+
+/* Replace gradient accents with simple rules */
+.kpi-card::before{
+  background:#cfd5d8;
+  transform:none;
+  opacity:1;
+  height:1px;
+}
+.kpi-card:hover::before{
+  transform:none;
+}
+
+/* Calm, human-feeling motion */
+.page>.hero-row,
+.kpi-grid>.kpi-card,
+.dashboard-grid>.card,
+.three-grid>.card,
+.auth-card{
+  animation:none !important;
+}
+
+/* Keep interaction feedback, but remove exaggerated lift */
+.card:hover,
+.kpi-card:hover,
+.foodie-category-card:hover,
+.foodie-recipe-card:hover,
+.foodie-instagram-tile:hover{
+  transform:translateY(-2px);
+}
+.foodie-photo-stamp{
+  animation:none !important;
+}
+.foodie-hero-photo:hover img,
+.foodie-chef-photo:hover img{
+  transform:scale(1.015);
+}
+
+/* Auth popup: solid, editorial form rather than AI/glass styling */
+.landing-auth-overlay{
+  background:rgba(17,19,21,.34);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+.auth-card{
+  background:#fff;
+  border:1px solid #dfe3e6;
+  box-shadow:0 22px 55px rgba(17,24,31,.16);
+}
+.auth-card::before{
+  display:none !important;
+}
+
+/* Landing page keeps the editorial reference, but without glossy surfaces */
+.foodie-header{
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  box-shadow:0 1px 0 rgba(17,24,31,.04);
+}
+.foodie-category-card,
+.foodie-recipe-image,
+.foodie-instagram-tile,
+.foodie-overlay-card{
+  box-shadow:0 5px 15px rgba(17,24,31,.055);
+}
+.foodie-category-card:hover,
+.foodie-recipe-card:hover,
+.foodie-instagram-tile:hover{
+  box-shadow:0 9px 20px rgba(17,24,31,.075);
+}
+
+/* Avoid decorative glow anywhere in the application */
+[style*="gradient"]{
+  background-image:none !important;
+}
+
+/* Clear, practical active states */
+.sidebar nav button.active{
+  box-shadow:none;
+}
+.button.primary{
+  box-shadow:0 2px 5px rgba(17,17,17,.09);
+}
+.button.primary:hover{
+  box-shadow:0 4px 10px rgba(17,17,17,.11);
+}
+
+/* Better readability without oversized visual tricks */
+.foodie-photo-stamp{
+  box-shadow:0 5px 14px rgba(17,24,31,.08);
+}
+
+/* Reduced motion is the default visual language for this pass */
+*{
+  scroll-behavior:smooth;
+}
