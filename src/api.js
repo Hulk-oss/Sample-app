@@ -84,6 +84,18 @@ export const api = {
       body: JSON.stringify({ name }),
     });
   },
+  async adminOverview() {
+    return request("/api/admin/overview");
+  },
+  async adminUsers() {
+    return request("/api/admin/users");
+  },
+  async adminCompanies() {
+    return request("/api/admin/companies");
+  },
+  async adminUserFinance(id) {
+    return request("/api/admin/users/" + id + "/finance");
+  },
   async dashboard() {
     return request("/api/dashboard");
   },
