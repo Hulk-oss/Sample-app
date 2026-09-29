@@ -11,6 +11,7 @@ import {
 import { calculateRunway, calculateSafeToSpend, calculateTaxReserve, formatFullINR, formatINR } from "./finance";
 import { api } from "./api";
 import CompanyPortal from "./features/company/CompanyPortal";
+import PlatformPortal from "./features/platform/PlatformPortal";
 import LandingPage from "./LandingPage";
 import PublicPages from "./pages/PublicPages";
 import Auth from "./features/auth/Auth";
@@ -129,6 +130,7 @@ function App() {
       {authOpen && <Auth initialMode={authOpen} close={() => setAuthOpen(false)} setAuth={setAuth} onAuthenticated={loadWorkspace} notify={notify} />}
     </>;
   }
+  if (user?.role === "platform_owner") return <PlatformPortal user={user} onLogout={logout} />;
   if (user?.role === "company_admin") return <CompanyPortal user={user} onLogout={logout} />;
   if (onboard || !finance) {
     if (loading && user && !onboard) {
