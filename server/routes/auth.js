@@ -71,13 +71,29 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   const data = parse(loginSchema, req.body);
   const user = await User.findOne({ email: data.email.toLowerCase() });
-  if (!user || !(await bcrypt.compare(data.password, user.passwordHash))) throw unauthorized("Email or password is incorrect");
-  if (env.platformOwnerEmail && user.email === env.platformOwnerEmail && user.role !== "platform_owner") {
+  if (!user || !(await bcrypt.compare(data.password, user.passwordHash))) {
+    throw unauthorized("Email or password is incorrect");
+  }
+
+  if (env.platformOwnerEmail && user.email === env.platformOwnerEmail) {
     user.role = "platform_owner";
   }
-  user.lastLoginAt = new Date();
-  await user.save();
-  res.json({ token: issueToken(user), user: publicUser(user) });
+
+  const token = issueToken(user);
+
+  User.updateOne(
+    { _id: user._id },
+    {
+      $set: {
+        lastLoginAt: new Date(),
+        ...(env.platformOwnerEmail && user.email === env.platformOwnerEmail
+          ? { role: "platform_owner" }
+          : {}),
+      },
+    }
+  ).catch(error => console.error("Login activity update failed", error));
+
+  res.json({ token, user: publicUser(user) });
 });
 
 router.post("/company-signup", async (req, res) => {
