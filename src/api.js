@@ -42,7 +42,7 @@ export const api = {
   async deleteTransaction(id) {
     return request("/api/transactions/" + id, { method: "DELETE" });
   },
-  async invoices() {
+  async createInvoice(invoice) {\n    return request("/api/invoices", { method: "POST", body: JSON.stringify(invoice) });\n  },\n  async invoices() {
     return request("/api/invoices");
   },
   async markInvoicePaid(id) {
