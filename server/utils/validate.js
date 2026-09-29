@@ -5,6 +5,7 @@ export const signupSchema = z.object({
   name: z.string().trim().min(2).max(80),
   email: z.string().trim().email().max(160),
   password: z.string().min(8).max(100),
+  inviteToken: z.string().min(20).optional(),
 });
 
 export const loginSchema = z.object({
@@ -67,3 +68,14 @@ export function parse(schema, value) {
   }
   return result.data;
 }
+
+export const companySignupSchema = z.object({
+  companyName: z.string().trim().min(2).max(120),
+  name: z.string().trim().min(2).max(80),
+  email: z.string().trim().email().max(160),
+  password: z.string().min(8).max(100),
+});
+
+export const companyInviteSchema = z.object({
+  email: z.string().trim().email().max(160),
+});
