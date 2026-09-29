@@ -1,67 +1,71 @@
 # API Contract
 
-The current MVP is frontend-only. These routes define a clean future backend boundary.
-
 ## Authentication
 
-- `POST /api/auth/signup`
-- `POST /api/auth/login`
-- `POST /api/auth/forgot-password`
+- POST /api/auth/signup
+- POST /api/auth/login
+- POST /api/auth/company-signup
+- POST /api/auth/forgot-password
+- POST /api/auth/reset-password
+- GET /api/auth/me
+- POST /api/auth/onboarding
 
-## Financial data
+A normal signup creates a user account with no financial records. Company signup creates a company_admin account and a company workspace.
 
-- `GET /api/dashboard`
-- `GET /api/transactions`
-- `POST /api/transactions`
-- `PATCH /api/transactions/:id`
-- `DELETE /api/transactions/:id`
-- `GET /api/invoices`
-- `POST /api/invoices`
-- `PATCH /api/invoices/:id`
-- `POST /api/invoices/:id/mark-paid`
-- `POST /api/invoices/:id/reminder-draft`
+## User portal
 
-Reminder drafting must not send an email in this MVP.
+Protected by user role:
 
-## Analytics
+- GET /api/dashboard
+- GET /api/transactions
+- POST /api/transactions
+- PATCH /api/transactions/:id
+- DELETE /api/transactions/:id
+- GET /api/invoices
+- POST /api/invoices
+- PATCH /api/invoices/:id
+- DELETE /api/invoices/:id
+- POST /api/invoices/:id/mark-paid
+- POST /api/invoices/:id/reminder-draft
+- GET /api/cash-flow
+- GET /api/runway
+- GET /api/tax-reserve
+- PATCH /api/profile
+- PATCH /api/assumptions
+- POST /api/ai/ask
+- GET /api/ai/history
 
-- `GET /api/cash-flow`
-- `GET /api/runway`
-- `GET /api/tax-reserve`
+## Company portal
 
-## AI CFO
+Protected by company_admin role:
 
-`POST /api/ai/ask`
+- GET /api/company/overview
+- POST /api/company/invites
+- DELETE /api/company/invites/:id
+- DELETE /api/company/members/:id
+- PATCH /api/company/profile
 
-The server should calculate trusted financial context before calling an AI provider.
+Company APIs do not return member financial transactions or invoices. They manage company membership and workspace operations.
 
-```json
-{
-  "question": "Can I spend ₹150000?",
-  "context": {
-    "safeToSpend": 332000,
-    "runwayMonths": 3.39,
-    "receivables": 320000
-  }
-}
-```
+## AI CFO contract
 
-Expected response:
+POST /api/ai/ask
 
-```json
-{
-  "answer": "Direct answer",
-  "keyNumbers": [],
-  "explanation": "Short explanation",
-  "nextAction": "Suggested next action",
-  "estimated": true
-}
-```
+Request body:
 
-Tax and regulated financial topics must be clearly labeled as estimates and not presented as professional advice.
+    {
+      "question": "Can I spend 150000?"
+    }
+
+The server builds trusted financial context from the authenticated user's records before generating the explanation.
 
 ## Error shape
 
-```json
-{"error":{"code":"VALIDATION_ERROR","message":"Human-readable message"}}
-```
+    {
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "Human-readable message"
+      }
+    }
+
+Financial calculations are never accepted from client totals as a source of truth.
