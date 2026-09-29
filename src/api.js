@@ -96,6 +96,9 @@ export const api = {
   async adminUserFinance(id) {
     return request("/api/admin/users/" + id + "/finance");
   },
+  async adminAudit() {
+    return request("/api/admin/audit");
+  },
   async dashboard() {
     return request("/api/dashboard");
   },
