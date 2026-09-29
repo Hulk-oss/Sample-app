@@ -6,12 +6,13 @@ import FinancialProfile from "../models/FinancialProfile.js";
 import { requireAuth } from "../middleware/auth.js";
 import { requireUserPortal } from "../middleware/user.js";
 import { validation } from "../utils/errors.js";
+import { requireUserFeature } from "../middleware/plans.js";
 import { calculateDashboard, explainQuestion } from "../finance/engine.js";
 
 const router = express.Router();
 router.use(requireAuth, requireUserPortal);
 
-router.post("/ask", async (req, res) => {
+router.post("/ask", requireUserFeature("aiCfo"), async (req, res) => {
   const question = String(req.body?.question || "").trim();
   if (!question || question.length > 500) throw validation("Enter a question up to 500 characters.");
   const [profile, transactions, invoices] = await Promise.all([
@@ -31,7 +32,7 @@ router.post("/ask", async (req, res) => {
   res.json({ response, context: finance, estimated: true });
 });
 
-router.get("/history", async (req, res) => {
+router.get("/history", requireUserFeature("aiCfo"), async (req, res) => {
   const conversations = await AIConversation.find({ userId: req.user._id })
     .sort({ createdAt: -1 })
     .limit(30)
