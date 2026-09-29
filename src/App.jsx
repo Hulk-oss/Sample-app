@@ -2,7 +2,7 @@ import {useMemo,useState} from "react";
 import{Activity,AlertCircle,ArrowDownRight,ArrowUpRight,BarChart3,Bell,Bot,CalendarDays,Check,ChevronDown,CircleHelp,CreditCard,FileText,LayoutDashboard,LogOut,Menu,MessageSquare,Plus,ReceiptText,Search,Send,Settings as SettingsIcon,ShieldCheck,Sparkles,Target,TrendingDown,TrendingUp,UserRound,Wallet,X}from"lucide-react";
 import{Area,AreaChart,Bar,BarChart,CartesianGrid,ResponsiveContainer,Tooltip,XAxis,YAxis}from"recharts";
 import{alerts,cashFlow,invoices as seedInvoices,profile,transactions as seedTransactions}from"./data";
-import{calculateRunway,calculateSafeToSpend,calculateTaxReserve,formatFullINR,formatINR}from"./finance";
+import{calculateRunway,calculateSafeToSpend,calculateTaxReserve,formatFullINR,formatINR}from"./finance";\nimport{api}from"./api";
 
 const nav=[["dashboard","Dashboard",LayoutDashboard],["transactions","Transactions",CreditCard],["invoices","Invoices",ReceiptText],["cashflow","Cash Flow",Activity],["tax","Tax Reserve",ShieldCheck],["runway","Runway",Target],["ai","AI CFO",Bot],["settings","Settings",SettingsIcon]];
 const money=formatINR;
@@ -11,21 +11,40 @@ function Button({children,onClick,variant="primary",icon:Icon}){return <button c
 function Kpi({label,value,sub,icon:Icon,tone=""}){return <div className={`kpi-card ${tone}`}><div className="kpi-top"><span>{label}</span><span className="icon-box"><Icon size={16}/></span></div><strong>{value}</strong><small>{sub}</small></div>}
 function ChartCard({title,subtitle,children,action}){return <section className="card chart-card"><div className="section-head"><div><h3>{title}</h3><p>{subtitle}</p></div>{action}</div>{children}</section>}
 function App(){
- const[page,setPage]=useState("dashboard"),[sidebar,setSidebar]=useState(false),[auth,setAuth]=useState(true),[onboard,setOnboard]=useState(true),[transactions,setTransactions]=useState(seedTransactions),[invoices,setInvoices]=useState(seedInvoices),[query,setQuery]=useState(""),[toast,setToast]=useState(null),[modal,setModal]=useState(null);
- const cash=742000,tax=145000,upcoming=115000,emergency=150000,avgExpenses=176000;
- const safe=calculateSafeToSpend({cashBalance:cash,taxReserve:tax,upcomingExpenses:upcoming,emergencyReserve:emergency}),runway=calculateRunway(cash-tax,avgExpenses);
- const receivables=invoices.filter(i=>i.status!=="Paid").reduce((a,i)=>a+i.amount,0),overdue=invoices.filter(i=>i.status==="Overdue");
+ const[page,setPage]=useState("dashboard"),[sidebar,setSidebar]=useState(false),[auth,setAuth]=useState(Boolean(localStorage.getItem("cfo_token"))),[onboard,setOnboard]=useState(false),[user,setUser]=useState(profile),[transactions,setTransactions]=useState(seedTransactions),[invoices,setInvoices]=useState(seedInvoices),[cashData,setCashData]=useState(seedCashFlow),[query,setQuery]=useState(""),[toast,setToast]=useState(null),[modal,setModal]=useState(null);
+ const[live,setLive]=useState(Boolean(localStorage.getItem("cfo_token")));
  const notify=m=>{setToast(m);setTimeout(()=>setToast(null),2400)};
- if(!auth)return <Auth setAuth={setAuth}/>;
- if(!onboard)return <Onboarding finish={()=>setOnboard(true)}/>;
- const common={cash,tax,upcoming,emergency,avgExpenses,safe,runway,receivables,overdue,setPage,notify};
- return <div className="app-shell"><aside className={`sidebar ${sidebar?"open":""}`}><div className="brand"><span className="brand-mark"><Sparkles size={17}/></span>Freelancer CFO</div><div className="workspace"><span className="avatar">AM</span><div><b>Alex Morgan</b><small>Independent</small></div><ChevronDown size={14}/></div><nav>{nav.map(([k,l,I])=><button className={page===k?"active":""} key={k} onClick={()=>{setPage(k);setSidebar(false)}}><I size={17}/>{l}{k==="ai"&&<i/>}</button>)}</nav><div className="sidebar-bottom"><button><CircleHelp size={17}/>Help</button><button onClick={()=>setAuth(false)}><LogOut size={17}/>Logout</button></div></aside><main className="main"><header className="topbar"><button className="mobile-menu" onClick={()=>setSidebar(!sidebar)}><Menu/></button><b>{nav.find(n=>n[0]===page)?.[1]}</b><div className="top-actions"><select><option>90 days</option><option>This month</option><option>6 months</option></select><button className="icon-button"><Bell size={17}/><i/></button><span className="top-avatar">AM</span></div></header><div className="content">
- {page==="dashboard"&&<Dashboard {...common}/>}
- {page==="transactions"&&<Transactions data={transactions} query={query} setQuery={setQuery} add={()=>{setTransactions([{id:Date.now(),date:"2026-09-29",description:"New client payment",client:"New client",category:"Client income",type:"Income",amount:25000},...transactions]);notify("Transaction added")}}/>}
- {page==="invoices"&&<Invoices data={invoices} markPaid={id=>{setInvoices(invoices.map(i=>i.id===id?{...i,status:"Paid"}:i));notify("Invoice marked paid")}} setModal={setModal}/>}
- {page==="cashflow"&&<CashFlow/>}{page==="tax"&&<TaxReserve/>}{page==="runway"&&<Runway {...common}/>}
- {page==="ai"&&<AICFO {...common}/>}
- {page==="settings"&&<Settings notify={notify}/>}</div></main><div className="mobile-nav">{nav.slice(0,5).map(([k,l,I])=><button className={page===k?"active":""} key={k} onClick={()=>setPage(k)}><I size={17}/><span>{l.split(" ")[0]}</span></button>)}</div>{modal&&<Reminder invoice={modal} close={()=>setModal(null)} notify={notify}/>} {toast&&<div className="toast"><Check size={15}/>{toast}</div>}</div>
+ const fallback={cashBalance:742000,taxReserve:145000,upcomingExpenses:115000,emergencyReserve:150000,receivables:320000,overdueTotal:210000,overdueCount:3,averageMonthlyExpenses:176000,monthlyIncomeGoal:300000,taxRate:.22};
+ const safe=calculateSafeToSpend(fallback),runway=calculateRunway(742000-145000,176000);
+ const [finance,setFinance]=useState({...fallback,safeToSpend:safe,runwayMonths:runway});
+ useEffect(()=>{if(!auth||!localStorage.getItem("cfo_token"))return;let alive=true;(async()=>{try{const[me,dash,tx,inv,cf]=await Promise.all([api.me(),api.dashboard(),api.transactions(),api.invoices(),api.cashFlow()]);if(!alive)return;setUser(me.user);setOnboard(!me.user.onboardingComplete);setFinance(dash.dashboard);setTransactions(tx.transactions);setInvoices(inv.invoices);setCashData([...cf.actual,...cf.forecast.map(x=>({...x,month:x.month+" est."}))]);setLive(true)}catch{api.logout();setAuth(false);setLive(false)}})();return()=>{alive=false}},[auth]);
+ if(!auth)return <Auth setAuth={setAuth} onDemo={async()=>{try{const r=await api.demo();localStorage.setItem("cfo_token",r.token);setUser(r.user);setAuth(true);setOnboard(false);setLive(true);notify("Demo workspace connected")}catch{setUser(profile);setAuth(true);setOnboard(false);setLive(false);notify("Demo mode loaded locally")}}}/>;
+ if(onboard)return <Onboarding finish={async values=>{try{if(live){const r=await api.onboarding(values);setUser(r.user);setFinance({...finance,...r.profile})}}catch(e){notify(e.message)}setOnboard(false)}}/>;
+ const overdue=invoices.filter(i=>i.status==="Overdue");
+ const common={cash:finance.cashBalance,tax:finance.taxReserve,upcoming:finance.upcomingExpenses,emergency:finance.emergencyReserve,avgExpenses:finance.averageMonthlyExpenses,safe:finance.safeToSpend,runway:finance.runwayMonths,receivables:finance.receivables,overdue,setPage,notify};
+ const logout=()=>{api.logout();setAuth(false);setLive(false);setUser(profile)};
+ return <div className="app-shell">
+   <aside className={`sidebar ${sidebar?"open":""}`}>
+    <div className="brand"><span className="brand-mark"><Sparkles size={17}/></span>Freelancer CFO</div>
+    <div className="workspace"><span className="avatar">{String(user.name||"AM").slice(0,2).toUpperCase()}</span><div><b>{user.name||"Alex Morgan"}</b><small>{user.profession||"Independent"}</small></div><ChevronDown size={13}/></div>
+    <nav>{nav.map(([k,l,I])=><button className={page===k?"active":""} key={k} onClick={()=>{setPage(k);setSidebar(false)}}><I size={15}/>{l}{k==="ai"&&<i/>}</button>)}</nav>
+    <div className="sidebar-bottom"><button><CircleHelp size={16}/>Help</button><button onClick={logout}><LogOut size={16}/>Logout</button></div>
+   </aside>
+   <main className="main"><header className="topbar"><button className="mobile-menu" onClick={()=>setSidebar(!sidebar)}><Menu size={19}/></button><b>{nav.find(n=>n[0]===page)?.[1]}</b><div className="top-actions"><select><option>90 days</option><option>This month</option><option>6 months</option></select><button className="icon-button"><Bell size={15}/><i/></button><span className="top-avatar">{String(user.name||"AM").slice(0,2).toUpperCase()}</span></div></header>
+   <div className="content">
+    {page==="dashboard"&&<Dashboard {...common}/>}
+    {page==="transactions"&&<Transactions data={transactions} query={query} setQuery={setQuery} add={async()=>{const draft={id:Date.now(),date:"2026-09-29",description:"New client payment",client:"New client",category:"Client income",type:"Income",amount:25000};try{if(live){const r=await api.createTransaction({...draft,id:undefined});setTransactions([r.transaction,...transactions]);setFinance({...finance,cashBalance:finance.cashBalance+25000,safeToSpend:finance.safeToSpend+25000})}else setTransactions([draft,...transactions]);notify("Transaction added")}catch(e){notify(e.message)}}}/>}
+    {page==="invoices"&&<Invoices data={invoices} markPaid={async id=>{try{if(live){const r=await api.markInvoicePaid(id);setInvoices(invoices.map(i=>(i._id||i.id)===id?r.invoice:i))}else setInvoices(invoices.map(i=>(i.id)===id?{...i,status:"Paid"}:i));notify("Invoice marked paid")}catch(e){notify(e.message)}}} setModal={setModal}/>}
+    {page==="cashflow"&&<CashFlow data={cashData}/>}
+    {page==="tax"&&<TaxReserve/>}
+    {page==="runway"&&<Runway {...common}/>}
+    {page==="ai"&&<AICFO {...common}/>}
+    {page==="settings"&&<Settings notify={notify}/>}
+   </div></main>
+   <div className="mobile-nav">{nav.slice(0,5).map(([k,l,I])=><button className={page===k?"active":""} key={k} onClick={()=>setPage(k)}><I size={16}/><span>{l.split(" ")[0]}</span></button>)}</div>
+   {modal&&<Reminder invoice={modal} close={()=>setModal(null)} notify={notify}/>}
+   {toast&&<div className="toast"><Check size={14}/>{toast}</div>}
+ </div>
 }
 function Head({eyebrow,title,text,action}){return <div className="hero-row"><div><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p>{text}</p></div>{action}</div>}
 function Dashboard({safe,cash,tax,upcoming,emergency,runway,receivables,overdue,setPage,notify}){
