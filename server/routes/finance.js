@@ -7,6 +7,7 @@ import { requireUserPortal } from "../middleware/user.js";
 import { calculateDashboard, buildMonthlyCashFlow, buildForecast, calculateRunway, calculateTaxReserve, getAverageMonthlyExpenses, getAverageMonthlyIncome } from "../finance/engine.js";
 import { parse, profileSchema } from "../utils/validate.js";
 import { validation } from "../utils/errors.js";
+import { requireUserFeature } from "../middleware/plans.js";
 
 const router = express.Router();
 router.use(requireAuth, requireUserPortal);
@@ -29,7 +30,7 @@ router.get("/dashboard", async (req, res) => {
   });
 });
 
-router.get("/cash-flow", async (req, res) => {
+router.get("/cash-flow", requireUserFeature("cashflow"), async (req, res) => {
   const context = await getContext(req.user._id);
   const actual = buildMonthlyCashFlow(context.transactions, context.profile.openingCashBalance, 6, context.now);
   const dashboard = calculateDashboard(context);
@@ -48,7 +49,7 @@ router.get("/cash-flow", async (req, res) => {
   });
 });
 
-router.get("/runway", async (req, res) => {
+router.get("/runway", requireUserFeature("runway"), async (req, res) => {
   const context = await getContext(req.user._id);
   const dashboard = calculateDashboard(context);
   const scenarios = [
@@ -65,7 +66,7 @@ router.get("/runway", async (req, res) => {
   });
 });
 
-router.get("/tax-reserve", async (req, res) => {
+router.get("/tax-reserve", requireUserFeature("taxReserve"), async (req, res) => {
   const context = await getContext(req.user._id);
   const estimate = calculateTaxReserve(context.profile.relevantTaxIncomeBase, context.profile.taxReserveRate);
   res.json({
