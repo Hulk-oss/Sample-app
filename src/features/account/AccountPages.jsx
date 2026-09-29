@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { ArrowRight, CircleHelp, CreditCard, FileText, LockKeyhole, Mail, ShieldCheck, Bell, Check } from "lucide-react";
-import { Button, Head } from "../components/ui/Primitives";
-import { isUserFeatureEnabled } from "../pricing";
+import { Button, Head } from "../../components/ui/Primitives";
+import { isUserFeatureEnabled } from "../../pricing";
 
-export function Billing({ user, setPage }) {
+export function Billing({ user }) {
   const isPro = user?.plan === "pro";
   return <div className="page">
-    <Head eyebrow="Account" title="Billing" text="Review your current plan and the features available to this account." action={<Button icon={CreditCard} onClick={() => setPage?.("pricing")}>View pricing</Button>} />
+    <Head eyebrow="Account" title="Billing" text="Review your current plan and the features available to this account." />
     <div className="billing-grid">
       <section className="card billing-card">
         <div className="billing-top"><span className="eyebrow">Current plan</span><strong>{isPro ? "Individual Pro" : "Individual"}</strong><Badge tone="success">{isPro ? "Pro" : "Free"}</Badge></div>
@@ -22,7 +22,7 @@ export function Billing({ user, setPage }) {
             ["AI CFO", isUserFeatureEnabled(user, "ai")],
           ].map(([label,enabled]) => <span key={label} className={enabled ? "enabled" : "disabled"}><Check size={13} />{label}</span>)}
         </div>
-        {!isPro && <button className="public-primary" onClick={() => setPage?.("pricing")}>Review Pro</button>}
+        {!isPro && <p className="billing-note">Upgrade to Individual Pro from the public Pricing page when subscription billing is enabled for your deployment.</p>}
       </section>
       <section className="card billing-card">
         <div className="settings-title"><CreditCard size={18} /><div><h3>Subscription status</h3><p>Plan billing is currently managed at the product level.</p></div></div>
