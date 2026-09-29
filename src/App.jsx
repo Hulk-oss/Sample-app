@@ -1,72 +1,501 @@
-import {useMemo,useState} from "react";
-import{Activity,AlertCircle,ArrowDownRight,ArrowUpRight,BarChart3,Bell,Bot,CalendarDays,Check,ChevronDown,CircleHelp,CreditCard,FileText,LayoutDashboard,LogOut,Menu,MessageSquare,Plus,ReceiptText,Search,Send,Settings as SettingsIcon,ShieldCheck,Sparkles,Target,TrendingDown,TrendingUp,UserRound,Wallet,X}from"lucide-react";
-import{Area,AreaChart,Bar,BarChart,CartesianGrid,ResponsiveContainer,Tooltip,XAxis,YAxis}from"recharts";
-import{alerts,cashFlow,invoices as seedInvoices,profile,transactions as seedTransactions}from"./data";
-import{calculateRunway,calculateSafeToSpend,calculateTaxReserve,formatFullINR,formatINR}from"./finance";\nimport{api}from"./api";
+import { useEffect, useState } from "react";
+import {
+  Activity, AlertCircle, ArrowDownRight, ArrowUpRight, Bell, Bot, CalendarDays, Check,
+  ChevronDown, CircleHelp, CreditCard, FileText, LayoutDashboard, LogOut, Menu,
+  MessageSquare, Plus, ReceiptText, Search, Send, Settings as SettingsIcon, ShieldCheck,
+  Sparkles, Target, TrendingDown, TrendingUp, UserRound, Wallet, X
+} from "lucide-react";
+import {
+  Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis
+} from "recharts";
+import { calculateRunway, calculateSafeToSpend, calculateTaxReserve, formatFullINR, formatINR } from "./finance";
+import { api } from "./api";
 
-const nav=[["dashboard","Dashboard",LayoutDashboard],["transactions","Transactions",CreditCard],["invoices","Invoices",ReceiptText],["cashflow","Cash Flow",Activity],["tax","Tax Reserve",ShieldCheck],["runway","Runway",Target],["ai","AI CFO",Bot],["settings","Settings",SettingsIcon]];
-const money=formatINR;
-function Badge({children,tone="neutral"}){return <span className={`badge ${tone}`}>{children}</span>}
-function Button({children,onClick,variant="primary",icon:Icon,type="button"}){return <button type={type} className={`button ${variant}`} onClick={onClick}>{Icon&&<Icon size={15}/>} {children}</button>}
-function Kpi({label,value,sub,icon:Icon,tone=""}){return <div className={`kpi-card ${tone}`}><div className="kpi-top"><span>{label}</span><span className="icon-box"><Icon size={16}/></span></div><strong>{value}</strong><small>{sub}</small></div>}
-function ChartCard({title,subtitle,children,action}){return <section className="card chart-card"><div className="section-head"><div><h3>{title}</h3><p>{subtitle}</p></div>{action}</div>{children}</section>}
-function App(){
- const[page,setPage]=useState("dashboard"),[sidebar,setSidebar]=useState(false),[auth,setAuth]=useState(Boolean(localStorage.getItem("cfo_token"))),[onboard,setOnboard]=useState(false),[user,setUser]=useState(profile),[transactions,setTransactions]=useState(seedTransactions),[invoices,setInvoices]=useState(seedInvoices),[cashData,setCashData]=useState(seedCashFlow),[query,setQuery]=useState(""),[toast,setToast]=useState(null),[modal,setModal]=useState(null);
- const[live,setLive]=useState(Boolean(localStorage.getItem("cfo_token")));
- const notify=m=>{setToast(m);setTimeout(()=>setToast(null),2400)};
- const fallback={cashBalance:742000,taxReserve:145000,upcomingExpenses:115000,emergencyReserve:150000,receivables:320000,overdueTotal:210000,overdueCount:3,averageMonthlyExpenses:176000,monthlyIncomeGoal:300000,taxRate:.22};
- const safe=calculateSafeToSpend(fallback),runway=calculateRunway(742000-145000,176000);
- const [finance,setFinance]=useState({...fallback,safeToSpend:safe,runwayMonths:runway});
- useEffect(()=>{if(!auth||!localStorage.getItem("cfo_token"))return;let alive=true;(async()=>{try{const[me,dash,tx,inv,cf]=await Promise.all([api.me(),api.dashboard(),api.transactions(),api.invoices(),api.cashFlow()]);if(!alive)return;setUser(me.user);setOnboard(!me.user.onboardingComplete);setFinance(dash.dashboard);setTransactions(tx.transactions);setInvoices(inv.invoices);setCashData([...cf.actual,...cf.forecast.map(x=>({...x,month:x.month+" est."}))]);setLive(true)}catch{api.logout();setAuth(false);setLive(false)}})();return()=>{alive=false}},[auth]);
- if(!auth)return <Auth setAuth={setAuth} onDemo={async()=>{try{const r=await api.demo();localStorage.setItem("cfo_token",r.token);setUser(r.user);setAuth(true);setOnboard(false);setLive(true);notify("Demo workspace connected")}catch{setUser(profile);setAuth(true);setOnboard(false);setLive(false);notify("Demo mode loaded locally")}}}/>;
- if(onboard)return <Onboarding finish={async values=>{try{if(live){const r=await api.onboarding(values);setUser(r.user);setFinance({...finance,...r.profile})}}catch(e){notify(e.message)}setOnboard(false)}}/>;
- const overdue=invoices.filter(i=>i.status==="Overdue");
- const common={cash:finance.cashBalance,tax:finance.taxReserve,upcoming:finance.upcomingExpenses,emergency:finance.emergencyReserve,avgExpenses:finance.averageMonthlyExpenses,safe:finance.safeToSpend,runway:finance.runwayMonths,receivables:finance.receivables,overdue,setPage,notify};
- const logout=()=>{api.logout();setAuth(false);setLive(false);setUser(profile)};
- return <div className="app-shell">
-   <aside className={`sidebar ${sidebar?"open":""}`}>
-    <div className="brand"><span className="brand-mark"><Sparkles size={17}/></span>Freelancer CFO</div>
-    <div className="workspace"><span className="avatar">{String(user.name||"AM").slice(0,2).toUpperCase()}</span><div><b>{user.name||"Alex Morgan"}</b><small>{user.profession||"Independent"}</small></div><ChevronDown size={13}/></div>
-    <nav>{nav.map(([k,l,I])=><button className={page===k?"active":""} key={k} onClick={()=>{setPage(k);setSidebar(false)}}><I size={15}/>{l}{k==="ai"&&<i/>}</button>)}</nav>
-    <div className="sidebar-bottom"><button><CircleHelp size={16}/>Help</button><button onClick={logout}><LogOut size={16}/>Logout</button></div>
-   </aside>
-   <main className="main"><header className="topbar"><button className="mobile-menu" onClick={()=>setSidebar(!sidebar)}><Menu size={19}/></button><b>{nav.find(n=>n[0]===page)?.[1]}</b><div className="top-actions"><select><option>90 days</option><option>This month</option><option>6 months</option></select><button className="icon-button"><Bell size={15}/><i/></button><span className="top-avatar">{String(user.name||"AM").slice(0,2).toUpperCase()}</span></div></header>
-   <div className="content">
-    {page==="dashboard"&&<Dashboard {...common}/>}
-    {page==="transactions"&&<Transactions data={transactions} query={query} setQuery={setQuery} add={async()=>{const draft={id:Date.now(),date:"2026-09-29",description:"New client payment",client:"New client",category:"Client income",type:"Income",amount:25000};try{if(live){const r=await api.createTransaction({...draft,id:undefined});setTransactions([r.transaction,...transactions]);setFinance({...finance,cashBalance:finance.cashBalance+25000,safeToSpend:finance.safeToSpend+25000})}else setTransactions([draft,...transactions]);notify("Transaction added")}catch(e){notify(e.message)}}}/>}
-    {page==="invoices"&&<Invoices data={invoices} markPaid={async id=>{try{if(live){const r=await api.markInvoicePaid(id);setInvoices(invoices.map(i=>(i._id||i.id)===id?r.invoice:i))}else setInvoices(invoices.map(i=>(i.id)===id?{...i,status:"Paid"}:i));notify("Invoice marked paid")}catch(e){notify(e.message)}}} setModal={setModal}/>}
-    {page==="cashflow"&&<CashFlow data={cashData}/>}
-    {page==="tax"&&<TaxReserve/>}
-    {page==="runway"&&<Runway {...common}/>}
-    {page==="ai"&&<AICFO {...common}/>}
-    {page==="settings"&&<Settings notify={notify}/>}
-   </div></main>
-   <div className="mobile-nav">{nav.slice(0,5).map(([k,l,I])=><button className={page===k?"active":""} key={k} onClick={()=>setPage(k)}><I size={16}/><span>{l.split(" ")[0]}</span></button>)}</div>
-   {modal&&<Reminder invoice={modal} close={()=>setModal(null)} notify={notify}/>}
-   {toast&&<div className="toast"><Check size={14}/>{toast}</div>}
- </div>
+const nav = [
+  ["dashboard", "Overview", LayoutDashboard],
+  ["transactions", "Transactions", CreditCard],
+  ["invoices", "Invoices", ReceiptText],
+  ["cashflow", "Cash Flow", Activity],
+  ["tax", "Tax Reserve", ShieldCheck],
+  ["runway", "Runway", Target],
+  ["ai", "AI CFO", Bot],
+  ["settings", "Settings", SettingsIcon],
+];
+
+const money = formatINR;
+
+function Badge({ children, tone = "neutral" }) {
+  return <span className={"badge " + tone}>{children}</span>;
 }
-function Head({eyebrow,title,text,action}){return <div className="hero-row"><div><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p>{text}</p></div>{action}</div>}
-function Dashboard({safe,cash,tax,upcoming,emergency,runway,receivables,overdue,setPage,notify}){
- const pct=Math.min(100,safe/cash*100);return <div className="page"><Head eyebrow="Tuesday, September 29" title="Good morning, Alex" text="Here’s your financial picture." action={<Button icon={Plus} onClick={()=>notify("New transaction flow opened")}>Add transaction</Button>}/><div className="kpi-grid"><Kpi label="Cash Balance" value={money(cash)} sub="Available today" icon={Wallet}/><Kpi label="Tax Reserve" value={money(tax)} sub="22% target" icon={ShieldCheck}/><Kpi label="Receivables" value={money(receivables)} sub="Outstanding" icon={ReceiptText}/><Kpi label="Runway" value={runway.toFixed(1)+" mo"} sub="Target 6 months" icon={Target} tone={runway<6?"warning":""}/></div><div className="dashboard-grid"><section className="card safe-card"><div className="safe-copy"><div className="section-head"><div><p className="eyebrow">Financial guardrail</p><h2>Safe to spend</h2><p>Cash you can use without touching reserves.</p></div><Badge tone="success">● Live</Badge></div><div className="safe-number">{money(safe)}</div><div className="safe-progress"><i style={{width:pct+"%"}}/></div><div className="safe-meta"><span>{pct.toFixed(0)}% of current cash</span><button onClick={()=>setPage("cashflow")}>View scenarios →</button></div></div><div className="formula"><div>Cash<strong>{money(cash)}</strong></div><b>−</b><div>Tax reserve<strong>{money(tax)}</strong></div><b>−</b><div>Upcoming<strong>{money(upcoming)}</strong></div><b>−</b><div>Emergency<strong>{money(emergency)}</strong></div><b>=</b><div className="result">Safe to spend<strong>{money(safe)}</strong></div></div></section><ChartCard title="90-day cash flow" subtitle="Ending balance"><CashChart/></ChartCard></div><div className="three-grid"><ChartCard title="Income vs expenses" subtitle="Recent activity"><BarChartSmall/></ChartCard><section className="card"><div className="section-head"><div><h3>Upcoming expenses</h3><p>Next 30 days</p></div><CalendarDays size={17}/></div><ListRow title="Workspace" sub="Oct 01" value="₹18K"/><ListRow title="Software stack" sub="Oct 04" value="₹12.4K"/><ListRow title="Contractor" sub="Oct 11" value="₹42K"/><ListRow title="Accounting" sub="Oct 15" value="₹7.5K"/></section><section className="card"><div className="section-head"><div><h3>Financial alerts</h3><p>Needs attention</p></div><Bell size={17}/></div>{alerts.map((a,i)=><div className="alert" key={i}><span className={a.tone}><AlertCircle size={14}/></span><div><b>{a.title}</b><small>{a.text}</small></div></div>)}</section></div><section className="card ai-insight"><span className="ai-icon"><Bot size={19}/></span><div><p className="eyebrow">AI CFO insight</p><h3>{overdue.length} invoices are overdue</h3><p>That’s {money(overdue.reduce((a,i)=>a+i.amount,0))} outside your expected cash cycle. Consider sending reminders today.</p></div><Button variant="secondary" onClick={()=>setPage("ai")}>Ask AI CFO →</Button></section></div>
+
+function Button({ children, onClick, variant = "primary", icon: Icon, type = "button" }) {
+  return <button type={type} className={"button " + variant} onClick={onClick}>
+    {Icon && <Icon size={14} />} {children}
+  </button>;
 }
-function CashChart(){return <ResponsiveContainer width="100%" height={245}><AreaChart data={cashFlow}><defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#6065FA" stopOpacity=".25"/><stop offset="100%" stopColor="#6065FA" stopOpacity="0"/></linearGradient></defs><CartesianGrid stroke="#272A31" vertical={false}/><XAxis dataKey="month" stroke="#858995" tickLine={false} axisLine={false}/><YAxis stroke="#858995" tickLine={false} axisLine={false} tickFormatter={v=>"₹"+Math.round(v/100000)+"L"} width={38}/><Tooltip contentStyle={{background:"#181A20",border:"1px solid #3C414C",borderRadius:10}} formatter={v=>formatFullINR(v)}/><Area dataKey="balance" type="monotone" stroke="#6065FA" fill="url(#fill)" strokeWidth={3}/></AreaChart></ResponsiveContainer>}
-function BarChartSmall(){return <ResponsiveContainer width="100%" height={200}><BarChart data={cashFlow.slice(0,3)}><CartesianGrid stroke="#272A31" vertical={false}/><XAxis dataKey="month" stroke="#858995" tickLine={false} axisLine={false}/><YAxis hide/><Tooltip contentStyle={{background:"#181A20",border:"1px solid #3C414C",borderRadius:10}} formatter={v=>formatFullINR(v)}/><Bar dataKey="income" fill="#6065FA" radius={[4,4,0,0]}/><Bar dataKey="expenses" fill="#D75A35" radius={[4,4,0,0]}/></BarChart></ResponsiveContainer>}
-function ListRow({title,sub,value}){return <div className="row"><div><b>{title}</b><small>{sub}</small></div><strong>{value}</strong></div>}
-function Transactions({data,query,setQuery,add}){const filtered=data.filter(t=>[t.description,t.client,t.category].join(" ").toLowerCase().includes(query.toLowerCase()));const income=data.filter(t=>t.type==="Income").reduce((a,t)=>a+t.amount,0),expense=data.filter(t=>t.type==="Expense").reduce((a,t)=>a+t.amount,0);return <div className="page"><Head eyebrow="Money in and out" title="Transactions" text="Keep every movement categorized and visible." action={<Button icon={Plus} onClick={add}>Add transaction</Button>}/><div className="summary-grid"><Kpi label="Income" value={money(income)} sub="Selected period" icon={ArrowDownRight}/><Kpi label="Expenses" value={money(expense)} sub="Selected period" icon={ArrowUpRight}/><Kpi label="Net" value={money(income-expense)} sub="Positive movement" icon={TrendingUp}/></div><section className="card"><div className="toolbar"><div className="search"><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search transactions..."/></div><div className="filters"><Button variant="secondary">All types <ChevronDown size={14}/></Button><Button variant="secondary">Category <ChevronDown size={14}/></Button><Button variant="secondary">Date</Button></div></div><DataTable headers={["Date","Description","Client","Category","Type","Amount"]} rows={filtered.map(t=>[new Date(t.date).toLocaleDateString("en-IN",{day:"2-digit",month:"short"}),t.description,t.client,t.category,<Badge tone={t.type==="Income"?"success":"neutral"}>{t.type}</Badge>,money(t.amount)])}/></section></div>}
-function DataTable({headers,rows}){return <div className="table-wrap"><table><thead><tr>{headers.map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{rows.map((r,i)=><tr key={i}>{r.map((c,j)=><td key={j}>{c}</td>)}</tr>)}</tbody></table></div>}
-function Invoices({data,markPaid,setModal}){const total=data.reduce((a,i)=>a+i.amount,0),paid=data.filter(i=>i.status==="Paid").reduce((a,i)=>a+i.amount,0),over=data.filter(i=>i.status==="Overdue").reduce((a,i)=>a+i.amount,0);return <div className="page"><Head eyebrow="Accounts receivable" title="Invoices" text="Know what’s paid, due, and at risk." action={<Button icon={Plus}>Create invoice</Button>}/><div className="summary-grid"><Kpi label="Total invoiced" value={money(total)} sub="5 invoices" icon={FileText}/><Kpi label="Paid" value={money(paid)} sub="Collected" icon={Check}/><Kpi label="Outstanding" value={money(total-paid)} sub="Awaiting payment" icon={Wallet}/><Kpi label="Overdue" value={money(over)} sub="Needs attention" icon={AlertCircle} tone="warning"/></div><section className="card"><div className="section-head"><div><h3>Invoice register</h3><p>Client payment status</p></div><Button variant="secondary" icon={Search}>Search</Button></div><div className="invoice-list">{data.map(i=><div className="invoice-row" key={i.id}><div className="invoice-main"><span className="invoice-logo">{i.client[0]}</span><div><b>{i.client}</b><small>{i.id} · Due {i.dueDate}</small></div></div><strong>{money(i.amount)}</strong><Badge tone={i.status.toLowerCase()}>{i.status}</Badge><div className="invoice-actions"><button><FileText size={15}/></button>{i.status!=="Paid"&&<button onClick={()=>markPaid(i.id)}><Check size={15}/></button>}<button onClick={()=>setModal(i)}><MessageSquare size={15}/></button></div></div>)}</div></section></div>}
-function CashFlow({data=[]}){const[mode,setMode]=useState("actual");const visible=mode==="actual"?data.filter(x=>!x.estimated):data.filter(x=>x.estimated);const projected=data.filter(x=>x.estimated);const ending=projected.at(-1)?.balance||data.at(-1)?.balance||0;const lowest=projected.length?Math.min(...projected.map(x=>x.balance)):ending;const net=(visible.reduce((a,x)=>a+Number(x.income||0),0)-visible.reduce((a,x)=>a+Number(x.expenses||0),0));return <div className="page"><Head eyebrow="Liquidity planning" title="Cash Flow" text="Look forward without losing sight of what has already happened." action={<div className="segmented"><button className={mode==="actual"?"active":""} onClick={()=>setMode("actual")}>Actual</button><button className={mode==="forecast"?"active":""} onClick={()=>setMode("forecast")}>Forecast</button></div>}/><div className="summary-grid"><Kpi label="Net cash flow" value={money(net)} sub={mode==="forecast"?"Modeled":"Actual period"} icon={Activity}/><Kpi label="Projected ending" value={money(ending)} sub="Estimated endpoint" icon={TrendingUp}/><Kpi label="Lowest projected" value={money(lowest)} sub="Forecast window" icon={TrendingDown}/></div><ChartCard title="Cash balance trajectory" subtitle={mode==="forecast"?"Estimated balances":"Actual balances"} action={<Badge>{mode==="forecast"?"Estimated":"Actual"}</Badge>}><CashChart data={visible.length?visible:data}/></ChartCard><div className="two-grid"><ChartCard title="Income / expenses" subtitle="Movement by month"><BarChartSmall data={data}/></ChartCard><section className="card"><h3>Forecast notes</h3><div className="note-list"><p>✓ Historical rows remain separated from estimates.</p><p>! Forecast values are planning estimates, not guarantees.</p><p>✓ Reserve targets remain visible as a floor.</p></div></section></div></div>}
-function TaxReserve(){const[rate,setRate]=useState(22),income=659091,reserved=145000,estimate=calculateTaxReserve(income,rate/100);return <div className="page"><Head eyebrow="Planning estimate" title="Tax Reserve" text="Set aside cash before tax deadlines create pressure." action={<Badge tone="warning">Estimate only</Badge>}/><div className="three-grid"><Kpi label="Estimated tax reserve" value={money(estimate)} sub={rate+"% of relevant income"} icon={ShieldCheck}/><Kpi label="Already reserved" value={money(reserved)} sub="Current reserve" icon={Wallet}/><Kpi label="Additional needed" value={money(Math.max(0,estimate-reserved))} sub="To reach estimate" icon={Target}/></div><section className="card tax-control"><div><p className="eyebrow">Assumption</p><h3>Tax reserve percentage</h3><p>Use your own planning assumption. This is not a tax calculation.</p></div><div className="rate-control"><strong>{rate}%</strong><input type="range" min="5" max="40" value={rate} onChange={e=>setRate(+e.target.value)}/><div><span>5%</span><span>40%</span></div></div></section><div className="disclaimer"><ShieldCheck size={17}/><span><b>Estimate only — not tax advice.</b> Consult a qualified professional for tax decisions.</span></div></div>}
-function Runway({cash,tax,avgExpenses,runway}){const available=cash-tax,sc=[["Normal income",runway,"Current expense baseline"],["Income −30%",runway*.82,"Moderate revenue pressure"],["Income = 0",available/avgExpenses,"Expenses only"]];const pct=Math.min(100,runway/6*100),dash=2*Math.PI*68,offset=dash-(dash*pct/100);return <div className="page"><Head eyebrow="Liquidity resilience" title="Runway" text="How long your available cash can support the current cost base." action={<Badge tone="warning">{runway.toFixed(1)} months current</Badge>}/><section className="card runway-hero"><div className="runway-ring"><svg viewBox="0 0 160 160" aria-hidden="true"><circle className="runway-track" cx="80" cy="80" r="68" fill="none"/><circle className="runway-value" cx="80" cy="80" r="68" fill="none" strokeDasharray={dash} strokeDashoffset={offset}/></svg><div><strong>{runway.toFixed(1)}</strong><span>months</span></div></div><div><p className="eyebrow">Current runway</p><h2>{runway<6?"Below your 6-month target":"Within target range"}</h2><p>Available cash: <b>{money(available)}</b>. Average monthly expenses: <b>{money(avgExpenses)}</b>.</p></div></section><div className="three-grid">{sc.map(s=><section className="card scenario" key={s[0]}><span>{s[0]}</span><strong>{s[1].toFixed(1)} mo</strong><p>{s[2]}</p><div className="mini-bar"><i style={{width:Math.min(100,s[1]/12*100)+"%"}}/></div></section>)}</div></div>}
-function AICFO({safe,runway,overdue,receivables}){const[messages,setMessages]=useState([{role:"ai",text:`Your safe-to-spend is ${money(safe)} based on the stored cash, tax, upcoming-expense, and emergency-reserve assumptions.`}]),[input,setInput]=useState("");const prompts=["Can I spend ₹1.5L?","Why is my safe-to-spend this amount?","Which invoices are overdue?","What is my runway?","How much should I reserve?","What if income falls 30%?"];const answer=q=>{const l=q.toLowerCase();if(l.includes("overdue"))return `${overdue.length} invoices are overdue, totaling ${money(overdue.reduce((a,i)=>a+i.amount,0))}.`;if(l.includes("runway"))return `Your current runway is ${runway.toFixed(1)} months using the stored finance results.`;if(l.includes("reserve"))return "The current tax reserve is ₹1.45L using a 22% planning assumption. This is an estimate, not tax advice.";if(l.includes("30%"))return "A 30% income reduction would tighten future cash capacity. Review discretionary expenses before changing reserves.";if(l.includes("1.5"))return safe>=150000?"Yes. ₹1.5L is within the current safe-to-spend guardrail.":"₹1.5L is above the current safe-to-spend guardrail.";return `Stored results show safe-to-spend ${money(safe)} and receivables ${money(receivables)}. I won't invent missing financial data.`};const send=q=>{if(!q.trim())return;setMessages([...messages,{role:"user",text:q},{role:"ai",text:answer(q)}]);setInput("")};return <div className="page ai-page"><Head eyebrow="Your financial copilot" title="AI CFO" text="Ask about your numbers. Answers use deterministic finance results." action={<Badge tone="success">● Context connected</Badge>}/><div className="ai-layout"><section className="card chat-card"><div className="chat-head"><span className="ai-icon"><Bot size={18}/></span><div><b>Freelancer CFO</b><small>Finance context · estimates labeled</small></div></div><div className="messages">{messages.map((m,i)=><div className={`message ${m.role}`} key={i}><span className="message-avatar">{m.role==="ai"?<Bot size={14}/>:<UserRound size={14}/>}</span><div>{m.text}</div></div>)}</div><div className="suggestions">{prompts.map(p=><button key={p} onClick={()=>send(p)}>{p}</button>)}</div><div className="chat-input"><input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send(input)} placeholder="Ask about your finances..."/><button onClick={()=>send(input)}><Send size={16}/></button></div></section><aside className="card context-card"><h3>Financial context</h3><p>Read-only calculation results</p><ListRow title="Safe to spend" sub="" value={money(safe)}/><ListRow title="Receivables" sub="" value={money(receivables)}/><ListRow title="Runway" sub="" value={runway.toFixed(1)+" mo"}/><div className="context-note">AI explains stored results; critical numbers come from the finance engine.</div></aside></div></div>}
-function Settings({notify}){return <div className="page"><Head eyebrow="Control center" title="Settings" text="Keep your profile and financial assumptions current." action={<Button icon={Check} onClick={()=>notify("Settings saved")}>Save changes</Button>}/><div className="settings-grid"><SettingsCard title="Profile" icon={<UserRound/>}><label>Full name<input defaultValue={profile.name}/></label><label>Profession<input defaultValue={profile.profession}/></label></SettingsCard><SettingsCard title="Financial assumptions" icon={<ShieldCheck/>}><label>Tax reserve %<input defaultValue="22"/></label><label>Emergency reserve<input defaultValue="₹1,50,000"/></label><label>Monthly income goal<input defaultValue="₹3,00,000"/></label></SettingsCard><SettingsCard title="Notifications" icon={<Bell/>}><Toggle text="Overdue invoice alerts" on/><Toggle text="Low runway alerts" on/><Toggle text="Weekly finance summary"/></SettingsCard><SettingsCard title="Appearance & security" icon={<SettingsIcon/>}><Toggle text="Dark theme" on/><Toggle text="Two-step verification"/><button className="danger-link">Log out of all devices</button></SettingsCard></div></div>}
-function SettingsCard({title,icon,children}){return <section className="card settings-card"><div className="settings-title">{icon}<div><h3>{title}</h3><p>Workspace preferences and controls.</p></div></div>{children}</section>}
-function Toggle({text,on:initial=false}){const[on,setOn]=useState(initial);return <button className="toggle-row" onClick={()=>setOn(!on)}><span>{text}</span><i className={on?"on":""}><b/></i></button>}
-function Reminder({invoice,close,notify}){const[text,setText]=useState(`Hi ${invoice.client},\n\nJust a quick reminder that invoice ${invoice.id} for ${money(invoice.amount)} is now past its due date. Could you share an expected payment date?\n\nThanks,\nAlex`);return <div className="modal-backdrop" onMouseDown={close}><div className="modal" onMouseDown={e=>e.stopPropagation()}><div className="modal-head"><div><p className="eyebrow">Draft only</p><h3>Payment reminder</h3></div><button onClick={close}><X size={18}/></button></div><p className="modal-note">AI-generated copy for review. Nothing will be sent.</p><textarea value={text} onChange={e=>setText(e.target.value)}/><div className="modal-actions"><Button variant="secondary" onClick={close}>Cancel</Button><Button icon={Check} onClick={()=>{close();notify("Reminder draft saved")}}>Save draft</Button></div></div></div>}
-function Auth({setAuth,onDemo}){const[mode,setMode]=useState("login"),[name,setName]=useState(""),[email,setEmail]=useState(""),[password,setPassword]=useState("");
- const submit=async e=>{e.preventDefault();try{const r=mode==="signup"?await api.signup(name,email,password):await api.login(email,password);localStorage.setItem("cfo_token",r.token);setAuth(true)}catch(error){window.alert(error.message)}};
- return <div className="auth-shell"><form className="auth-card" onSubmit={submit}><div className="brand"><span className="brand-mark"><Sparkles size={16}/></span>Freelancer CFO</div><div className="auth-title"><p className="eyebrow">Private financial workspace</p><h1>{mode==="signup"?"Create your CFO workspace":"Welcome back"}</h1><p>Clear cash decisions, reserve planning, and receivables in one calm workspace.</p></div>{mode==="signup"&&<label>Name<input value={name} onChange={e=>setName(e.target.value)} placeholder="Alex Morgan"/></label>}<label>Email<input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/></label><label>Password<input value={password} onChange={e=>setPassword(e.target.value)} type="password" placeholder="••••••••"/></label><Button type="submit">{mode==="signup"?"Create account":"Log in"}</Button>{mode==="login"&&<button type="button" className="text-button" onClick={()=>window.alert("Use the backend reset endpoint in development, or connect an email provider for production.")}>Forgot password?</button>}<Button variant="secondary" type="button" onClick={onDemo}>Continue with demo account</Button><p className="auth-switch">{mode==="signup"?"Already have an account?":"New here?"} <button type="button" onClick={()=>setMode(mode==="signup"?"login":"signup")}>{mode==="signup"?"Log in":"Create an account"}</button></p></form></div>
+
+function Kpi({ label, value, sub, icon: Icon, tone = "" }) {
+  return <div className={"kpi-card " + tone}>
+    <div className="kpi-top"><span>{label}</span><span className="icon-box"><Icon size={15} /></span></div>
+    <strong>{value}</strong><small>{sub}</small>
+  </div>;
 }
-function Onboarding({finish}){const[step,setStep]=useState(0),steps=[["About you",["Name","Profession"]],["Cash picture",["Monthly income","Monthly expenses","Current cash"]],["Reserves",["Tax reserve %","Emergency reserve target"]],["Goal",["Monthly income goal"]]];return <div className="onboarding"><div className="onboard-top"><div className="brand"><span className="brand-mark"><Sparkles size={17}/></span>Freelancer CFO</div><span>Step {step+1} of 4</span></div><div className="progress"><i style={{width:(step+1)*25+"%"}}/></div><div className="onboard-card"><p className="eyebrow">Set up your guardrails</p><h1>{steps[step][0]}</h1><p>These inputs power your personalized financial picture.</p><div className="onboard-fields">{steps[step][1].map(x=><label key={x}>{x}<input placeholder="Enter value"/></label>)}</div><div className="onboard-actions">{step>0&&<Button variant="secondary" onClick={()=>setStep(step-1)}>Back</Button>}<Button onClick={()=>step===3?finish():setStep(step+1)}>{step===3?"Finish setup":"Continue"}</Button></div></div></div>}
+
+function EmptyState({ title, text, action }) {
+  return <div className="empty-state">{<div className="empty-icon"><Sparkles size={16} /></div>}<h3>{title}</h3><p>{text}</p>{action}</div>;
+}
+
+function ChartCard({ title, subtitle, children, action }) {
+  return <section className="card chart-card">
+    <div className="section-head"><div><h3>{title}</h3><p>{subtitle}</p></div>{action}</div>
+    {children}
+  </section>;
+}
+
+function Head({ eyebrow, title, text, action }) {
+  return <div className="hero-row">
+    <div><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p>{text}</p></div>
+    {action}
+  </div>;
+}
+
+function App() {
+  const [page, setPage] = useState("dashboard");
+  const [sidebar, setSidebar] = useState(false);
+  const [auth, setAuth] = useState(Boolean(localStorage.getItem("cfo_token")));
+  const [onboard, setOnboard] = useState(false);
+  const [user, setUser] = useState(null);
+  const [finance, setFinance] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [cashData, setCashData] = useState([]);
+  const [query, setQuery] = useState("");
+  const [toast, setToast] = useState(null);
+  const [modal, setModal] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const notify = message => {
+    setToast(message);
+    window.clearTimeout(window.__cfoToast);
+    window.__cfoToast = window.setTimeout(() => setToast(null), 2400);
+  };
+
+  async function loadWorkspace() {
+    if (!localStorage.getItem("cfo_token")) return;
+    setLoading(true);
+    try {
+      const me = await api.me();
+      setUser(me.user);
+      if (!me.user.onboardingComplete || !me.profile) {
+        setOnboard(true);
+        return;
+      }
+      const [dashboard, tx, inv, cashFlow] = await Promise.all([
+        api.dashboard(), api.transactions(), api.invoices(), api.cashFlow()
+      ]);
+      setFinance(dashboard.dashboard);
+      setTransactions(tx.transactions);
+      setInvoices(inv.invoices);
+      setCashData([
+        ...cashFlow.actual,
+        ...cashFlow.forecast.map(row => ({ ...row, month: row.month + " est." })),
+      ]);
+      setOnboard(false);
+    } catch (error) {
+      api.logout();
+      setAuth(false);
+      setFinance(null);
+      notify(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (auth) loadWorkspace();
+  }, [auth]);
+
+  async function finishOnboarding(values) {
+    try {
+      await api.onboarding(values);
+      setOnboard(false);
+      await loadWorkspace();
+      notify("Your financial workspace is ready");
+    } catch (error) {
+      notify(error.message);
+    }
+  }
+
+  function logout() {
+    api.logout();
+    setAuth(false);
+    setUser(null);
+    setFinance(null);
+    setTransactions([]);
+    setInvoices([]);
+    setCashData([]);
+  }
+
+  async function addTransaction() {
+    try {
+      const result = await api.createTransaction({
+        date: new Date().toISOString().slice(0, 10),
+        description: "New transaction",
+        client: "",
+        category: "Uncategorized",
+        type: "Expense",
+        amount: 0.01,
+      });
+      setTransactions(rows => [result.transaction, ...rows]);
+      await loadWorkspace();
+      notify("Transaction added");
+    } catch (error) {
+      notify(error.message);
+    }
+  }
+
+  async function markPaid(id) {
+    try {
+      const result = await api.markInvoicePaid(id);
+      setInvoices(rows => rows.map(row => (row._id || row.id) === id ? result.invoice : row));
+      await loadWorkspace();
+      notify("Invoice marked paid");
+    } catch (error) {
+      notify(error.message);
+    }
+  }
+
+  if (!auth) return <Auth setAuth={setAuth} onAuthenticated={loadWorkspace} notify={notify} />;
+  if (onboard || !finance) {
+    if (loading && user && !onboard) {
+      return <div className="auth-shell"><div className="auth-card"><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div><p>Loading your private workspace…</p></div></div>;
+    }
+    return <Onboarding finish={finishOnboarding} />;
+  }
+
+  const overdue = invoices.filter(row => row.status === "Overdue");
+  const common = {
+    finance, user, transactions, invoices, overdue, cashData, live: true,
+    setPage, notify, reload: loadWorkspace, loading
+  };
+
+  return <div className="app-shell">
+    <aside className={"sidebar " + (sidebar ? "open" : "")}>
+      <div className="brand"><span className="brand-mark"><Sparkles size={17} /></span>Freelancer CFO</div>
+      <div className="workspace">
+        <span className="avatar">{String(user?.name || "").slice(0, 2).toUpperCase()}</span>
+        <div><b>{user?.name}</b><small>{user?.profession || "Independent"}</small></div>
+        <ChevronDown size={13} />
+      </div>
+      <nav>{nav.map(([key, label, Icon]) =>
+        <button className={page === key ? "active" : ""} key={key} onClick={() => { setPage(key); setSidebar(false); }}>
+          <Icon size={15} />{label}{key === "ai" && <i />}
+        </button>
+      )}</nav>
+      <div className="sidebar-bottom"><button><CircleHelp size={16} />Help</button><button onClick={logout}><LogOut size={16} />Logout</button></div>
+    </aside>
+
+    <main className="main">
+      <header className="topbar">
+        <button className="mobile-menu" onClick={() => setSidebar(!sidebar)}><Menu size={19} /></button>
+        <b>{nav.find(row => row[0] === page)?.[1]}</b>
+        <div className="top-actions">
+          <select><option>90 days</option><option>This month</option><option>6 months</option></select>
+          <button className="icon-button"><Bell size={15} /><i /></button>
+          <span className="top-avatar">{String(user?.name || "").slice(0, 2).toUpperCase()}</span>
+        </div>
+      </header>
+
+      <div className="content">
+        {page === "dashboard" && <Dashboard {...common} />}
+        {page === "transactions" && <Transactions data={transactions} query={query} setQuery={setQuery} add={addTransaction} />}
+        {page === "invoices" && <Invoices data={invoices} markPaid={markPaid} setModal={setModal} />}
+        {page === "cashflow" && <CashFlow data={cashData} />}
+        {page === "tax" && <TaxReserve finance={finance} reload={loadWorkspace} notify={notify} />}
+        {page === "runway" && <Runway finance={finance} />}
+        {page === "ai" && <AICFO finance={finance} overdue={overdue} invoices={invoices} notify={notify} />}
+        {page === "settings" && <Settings user={user} finance={finance} reload={loadWorkspace} notify={notify} />}
+      </div>
+    </main>
+
+    <div className="mobile-nav">{nav.slice(0, 5).map(([key, label, Icon]) =>
+      <button className={page === key ? "active" : ""} key={key} onClick={() => setPage(key)}>
+        <Icon size={16} /><span>{label.split(" ")[0]}</span>
+      </button>
+    )}</div>
+
+    {modal && <Reminder invoice={modal} close={() => setModal(null)} notify={notify} />}
+    {toast && <div className="toast"><Check size={14} />{toast}</div>}
+  </div>;
+}
+
+function Dashboard({ finance, user, transactions, overdue, cashData, setPage }) {
+  const pct = finance.cashBalance > 0 ? Math.min(100, finance.safeToSpend / finance.cashBalance * 100) : 0;
+  const upcoming = finance.upcomingExpenses > 0;
+  const alerts = [];
+  if (finance.overdueCount > 0) alerts.push({ tone: "warning", title: "Overdue invoices", text: finance.overdueCount + " invoice(s) need attention." });
+  if (finance.runwayMonths < 6) alerts.push({ tone: "danger", title: "Runway target", text: "Your current runway is below the 6-month target." });
+  if (finance.additionalTaxReserve > 0) alerts.push({ tone: "info", title: "Tax reserve", text: money(finance.additionalTaxReserve) + " is needed to reach the current estimate." });
+
+  return <div className="page">
+    <Head eyebrow={new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })} title={"Good morning, " + (user?.name || "")} text="A private financial view built entirely from your own account data." action={<Button icon={Plus} onClick={() => setPage("transactions")}>Add transaction</Button>} />
+
+    <div className="kpi-grid">
+      <Kpi label="Cash Balance" value={money(finance.cashBalance)} sub="Available from your records" icon={Wallet} />
+      <Kpi label="Safe to Spend" value={money(finance.safeToSpend)} sub="After reserves & planned outflows" icon={Sparkles} />
+      <Kpi label="Receivables" value={money(finance.receivables)} sub="Outstanding invoices" icon={ReceiptText} />
+      <Kpi label="Runway" value={finance.runwayMonths.toFixed(1) + " mo"} sub="Target 6 months" icon={Target} tone={finance.runwayMonths < 6 ? "warning" : ""} />
+    </div>
+
+    <div className="dashboard-grid">
+      <section className="card safe-card">
+        <div className="safe-copy">
+          <div className="section-head">
+            <div><p className="eyebrow">Your financial guardrail</p><h2>Safe to spend</h2><p>What you can use without touching planned reserves.</p></div>
+            <Badge tone="success">Live</Badge>
+          </div>
+          <div className="safe-number">{money(finance.safeToSpend)}</div>
+          <div className="safe-progress"><i style={{ width: pct + "%" }} /></div>
+          <div className="safe-meta"><span>{pct.toFixed(0)}% of current cash</span><button onClick={() => setPage("runway")}>Explore scenarios →</button></div>
+        </div>
+        <div className="formula">
+          <div>Cash<strong>{money(finance.cashBalance)}</strong></div><b>−</b>
+          <div>Tax reserve<strong>{money(finance.taxReserve)}</strong></div><b>−</b>
+          <div>Upcoming<strong>{money(finance.upcomingExpenses)}</strong></div><b>−</b>
+          <div>Emergency<strong>{money(finance.emergencyReserve)}</strong></div><b>=</b>
+          <div className="result">Safe to spend<strong>{money(finance.safeToSpend)}</strong></div>
+        </div>
+      </section>
+
+      <ChartCard title="Cash balance" subtitle="Calculated from your own transaction history" action={<Badge>90 day view</Badge>}>
+        {cashData.length ? <CashChart data={cashData} /> : <EmptyState title="No cash-flow data yet" text="Add transactions to build your cash history." />}
+      </ChartCard>
+    </div>
+
+    <div className="three-grid">
+      <ChartCard title="Income vs expenses" subtitle="Your recorded activity">
+        {transactions.length ? <BarChartSmall data={cashData} /> : <EmptyState title="No transactions yet" text="Your first income or expense will appear here." />}
+      </ChartCard>
+      <section className="card"><div className="section-head"><div><h3>Upcoming expenses</h3><p>Next 30 days</p></div><CalendarDays size={16} /></div>
+        {upcoming ? <div className="row"><div><b>Planned expenses</b><small>Next 30 days</small></div><strong>{money(finance.upcomingExpenses)}</strong></div> : <EmptyState title="Nothing scheduled" text="No expenses are recorded for the next 30 days." />}
+      </section>
+      <section className="card"><div className="section-head"><div><h3>Needs attention</h3><p>Only from your account data</p></div><Bell size={16} /></div>
+        {alerts.length ? alerts.map((row, i) => <div className="alert" key={i}><span className={row.tone}><AlertCircle size={13} /></span><div><b>{row.title}</b><small>{row.text}</small></div></div>) : <EmptyState title="Nothing urgent" text="No current alerts have been calculated." />}
+      </section>
+    </div>
+
+    <section className="card ai-insight">
+      <span className="ai-icon"><Bot size={18} /></span>
+      <div><p className="eyebrow">AI CFO insight</p><h3>{overdue.length ? overdue.length + " invoice(s) need follow-up" : "Your workspace is ready"}</h3><p>{overdue.length ? money(overdue.reduce((a, row) => a + Number(row.amount), 0)) + " is outside the expected payment cycle." : "Add transactions and invoices to give the AI CFO real context to explain."}</p></div>
+      <Button variant="secondary" onClick={() => setPage("ai")}>Ask AI CFO</Button>
+    </section>
+  </div>;
+}
+
+function CashChart({ data }) {
+  return <ResponsiveContainer width="100%" height={245}><AreaChart data={data}><CartesianGrid stroke="#ebe7df" vertical={false} /><XAxis dataKey="month" stroke="#9a968d" tickLine={false} axisLine={false} /><YAxis stroke="#9a968d" tickLine={false} axisLine={false} tickFormatter={value => "₹" + Math.round(value / 100000) + "L"} width={38} /><Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #e6e1d7", borderRadius: 12 }} formatter={value => formatFullINR(value)} /><Area dataKey="balance" type="monotone" stroke="#191816" fill="#f0eee8" fillOpacity={1} strokeWidth={2.5} /></AreaChart></ResponsiveContainer>;
+}
+
+function BarChartSmall({ data }) {
+  return <ResponsiveContainer width="100%" height={200}><BarChart data={data}><CartesianGrid stroke="#ebe7df" vertical={false} /><XAxis dataKey="month" stroke="#9a968d" tickLine={false} axisLine={false} /><YAxis hide /><Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #e6e1d7", borderRadius: 12 }} formatter={value => formatFullINR(value)} /><Bar dataKey="income" fill="#191816" radius={[8, 8, 0, 0]} /><Bar dataKey="expenses" fill="#c9c5bc" radius={[8, 8, 0, 0]} /></BarChart></ResponsiveContainer>;
+}
+
+function ListRow({ title, sub, value }) {
+  return <div className="row"><div><b>{title}</b><small>{sub}</small></div><strong>{value}</strong></div>;
+}
+
+function Transactions({ data, query, setQuery, add }) {
+  const filtered = data.filter(row => [row.description, row.client, row.category].join(" ").toLowerCase().includes(query.toLowerCase()));
+  const income = data.filter(row => row.type === "Income").reduce((a, row) => a + Number(row.amount), 0);
+  const expense = data.filter(row => row.type === "Expense").reduce((a, row) => a + Number(row.amount), 0);
+  return <div className="page">
+    <Head eyebrow="Money in and out" title="Transactions" text="Every financial movement stays tied to the signed-in user." action={<Button icon={Plus} onClick={add}>Add transaction</Button>} />
+    <div className="summary-grid"><Kpi label="Income" value={money(income)} sub="Your recorded period" icon={ArrowDownRight} /><Kpi label="Expenses" value={money(expense)} sub="Your recorded period" icon={ArrowUpRight} /><Kpi label="Net" value={money(income - expense)} sub="Income less expenses" icon={TrendingUp} /></div>
+    <section className="card">
+      <div className="toolbar"><div className="search"><Search size={15} /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search your transactions..." /></div><div className="filters"><Button variant="secondary">All types <ChevronDown size={13} /></Button><Button variant="secondary">Category <ChevronDown size={13} /></Button><Button variant="secondary">Date</Button></div></div>
+      {filtered.length ? <DataTable headers={["Date", "Description", "Client", "Category", "Type", "Amount"]} rows={filtered.map(row => [
+        new Date(row.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }),
+        row.description, row.client || "—", row.category,
+        <Badge tone={row.type === "Income" ? "success" : "neutral"}>{row.type}</Badge>, money(row.amount)
+      ])} /> : <EmptyState title="No transactions" text="Add your first income or expense to start building the financial history." action={<Button icon={Plus} onClick={add}>Add transaction</Button>} />}
+    </section>
+  </div>;
+}
+
+function DataTable({ headers, rows }) {
+  return <div className="table-wrap"><table><thead><tr>{headers.map(header => <th key={header}>{header}</th>)}</tr></thead><tbody>{rows.map((row, i) => <tr key={i}>{row.map((cell, j) => <td key={j}>{cell}</td>)}</tr>)}</tbody></table></div>;
+}
+
+function Invoices({ data, markPaid, setModal }) {
+  const total = data.reduce((a, row) => a + Number(row.amount), 0);
+  const paid = data.filter(row => row.status === "Paid").reduce((a, row) => a + Number(row.amount), 0);
+  const overdue = data.filter(row => row.status === "Overdue").reduce((a, row) => a + Number(row.amount), 0);
+  return <div className="page">
+    <Head eyebrow="Accounts receivable" title="Invoices" text="Track the invoices that belong to your account, not shared demo records." />
+    <div className="summary-grid"><Kpi label="Total invoiced" value={money(total)} sub={data.length + " invoices"} icon={FileText} /><Kpi label="Paid" value={money(paid)} sub="Collected" icon={Check} /><Kpi label="Outstanding" value={money(total - paid)} sub="Awaiting payment" icon={Wallet} /></div>
+    <section className="card"><div className="section-head"><div><h3>Invoice register</h3><p>Your clients and payment status</p></div><Badge tone={overdue ? "warning" : "success"}>{overdue ? money(overdue) + " overdue" : "No overdue balance"}</Badge></div>
+      {data.length ? <div className="invoice-list">{data.map(row => { const id = row._id || row.id; const invoiceNumber = row.invoiceNumber || row.id; return <div className="invoice-row" key={id}><div className="invoice-main"><span className="invoice-logo">{String(row.client).slice(0, 1).toUpperCase()}</span><div><b>{row.client}</b><small>{invoiceNumber} · Due {new Date(row.dueDate).toLocaleDateString("en-IN")}</small></div></div><strong>{money(row.amount)}</strong><Badge tone={String(row.status).toLowerCase()}>{row.status}</Badge><div className="invoice-actions"><button title="View"><FileText size={14} /></button>{row.status !== "Paid" && <button title="Mark paid" onClick={() => markPaid(id)}><Check size={14} /></button>}<button title="Reminder draft" onClick={() => setModal(row)}><MessageSquare size={14} /></button></div></div>; })}</div> : <EmptyState title="No invoices yet" text="Create your first invoice when you are ready to track receivables." />}
+    </section>
+  </div>;
+}
+
+function CashFlow({ data }) {
+  const [mode, setMode] = useState("actual");
+  const visible = mode === "actual" ? data.filter(row => !row.estimated) : data.filter(row => row.estimated);
+  const projected = data.filter(row => row.estimated);
+  const ending = projected.at(-1)?.balance ?? data.at(-1)?.balance ?? 0;
+  const lowest = projected.length ? Math.min(...projected.map(row => row.balance)) : ending;
+  const net = visible.reduce((a, row) => a + Number(row.income || 0), 0) - visible.reduce((a, row) => a + Number(row.expenses || 0), 0);
+  return <div className="page"><Head eyebrow="Liquidity planning" title="Cash Flow" text="Historical movement and estimates generated from your own records." action={<div className="segmented"><button className={mode === "actual" ? "active" : ""} onClick={() => setMode("actual")}>Actual</button><button className={mode === "forecast" ? "active" : ""} onClick={() => setMode("forecast")}>Forecast</button></div>} />
+    <div className="summary-grid"><Kpi label="Net cash flow" value={money(net)} sub={mode === "forecast" ? "Modeled" : "Recorded"} icon={Activity} /><Kpi label="Projected ending" value={money(ending)} sub="Estimated endpoint" icon={TrendingUp} /><Kpi label="Lowest projected" value={money(lowest)} sub="Forecast window" icon={TrendingDown} /></div>
+    <ChartCard title="Balance trajectory" subtitle={mode === "forecast" ? "Estimated balances" : "Actual balances"} action={<Badge>{mode === "forecast" ? "Estimated" : "Actual"}</Badge>}>{visible.length ? <CashChart data={visible} /> : <EmptyState title="No forecast data" text="Add more financial activity to build a useful cash-flow forecast." />}</ChartCard>
+    <div className="two-grid"><ChartCard title="Income / expenses" subtitle="Movement by month">{data.length ? <BarChartSmall data={data} /> : <EmptyState title="No activity yet" text="Your recorded monthly movement will appear here." />}</ChartCard><section className="card"><h3>Forecast notes</h3><div className="note-list"><p>✓ Actual rows are calculated from persisted transactions.</p><p>! Forecast values are estimates, not guarantees.</p><p>✓ Reserve targets remain visible as a planning floor.</p></div></section></div>
+  </div>;
+}
+
+function TaxReserve({ finance, reload, notify }) {
+  const [rate, setRate] = useState(Math.round(finance.taxRate * 100));
+  const base = finance.taxRate > 0 ? finance.taxEstimate / finance.taxRate : 0;
+  const estimate = calculateTaxReserve(base, rate / 100);
+  async function save() {
+    try { await api.updateAssumptions({ taxReserveRate: rate / 100 }); await reload(); notify("Tax reserve assumption saved"); }
+    catch (error) { notify(error.message); }
+  }
+  return <div className="page"><Head eyebrow="Planning estimate" title="Tax Reserve" text="Use your own reserve percentage and keep the estimate clearly separate from tax advice." action={<Badge tone="warning">Estimate only</Badge>} />
+    <div className="three-grid"><Kpi label="Estimated reserve" value={money(estimate)} sub={rate + "% of stored income base"} icon={ShieldCheck} /><Kpi label="Already reserved" value={money(finance.taxReserve)} sub="Current account reserve" icon={Wallet} /><Kpi label="Additional needed" value={money(Math.max(0, estimate - finance.taxReserve))} sub="To reach estimate" icon={Target} /></div>
+    <section className="card tax-control"><div><p className="eyebrow">Assumption</p><h3>Tax reserve percentage</h3><p>Change this only to match your own planning assumption.</p></div><div className="rate-control"><strong>{rate}%</strong><input type="range" min="0" max="40" value={rate} onChange={e => setRate(Number(e.target.value))} /><div><span>0%</span><span>40%</span></div><Button onClick={save}>Save assumption</Button></div></section>
+    <div className="disclaimer"><ShieldCheck size={15} /><span><b>Estimate only — not tax advice.</b> Consult a qualified professional for tax decisions.</span></div>
+  </div>;
+}
+
+function Runway({ finance }) {
+  const available = finance.cashBalance - finance.taxReserve;
+  const normal = finance.runwayMonths;
+  const income30 = calculateRunway({ availableCash: available, averageMonthlyExpenses: finance.averageMonthlyExpenses + finance.monthlyIncomeGoal * .3 });
+  const zeroIncome = calculateRunway({ availableCash: available, averageMonthlyExpenses: finance.averageMonthlyExpenses });
+  const scenarios = [["Normal income", normal, "Current expense baseline"], ["Income −30%", income30, "Conservative planning scenario"], ["Income = 0", zeroIncome, "Expenses-only view"]];
+  const pct = Math.min(100, normal / 6 * 100);
+  const circumference = 2 * Math.PI * 68;
+  return <div className="page"><Head eyebrow="Liquidity resilience" title="Runway" text="See how long your available cash can support your current cost base." action={<Badge tone={normal < 6 ? "warning" : "success"}>{normal.toFixed(1)} months</Badge>} />
+    <section className="card runway-hero"><div className="runway-ring"><svg viewBox="0 0 160 160" aria-hidden="true"><circle className="runway-track" cx="80" cy="80" r="68" fill="none" /><circle className="runway-value" cx="80" cy="80" r="68" fill="none" strokeDasharray={circumference} strokeDashoffset={circumference - circumference * pct / 100} /></svg><div><strong>{normal.toFixed(1)}</strong><span>months</span></div></div><div><p className="eyebrow">Current runway</p><h2>{normal.toFixed(1)} months of modeled coverage</h2><p>Available cash <b>{money(available)}</b>. Average monthly expenses <b>{money(finance.averageMonthlyExpenses)}</b>.</p></div></section>
+    <div className="three-grid">{scenarios.map(([title, value, note]) => <section className="card scenario" key={title}><span>{title}</span><strong>{value.toFixed(1)} mo</strong><p>{note}</p><div className="mini-bar"><i style={{ width: Math.min(100, value / 12 * 100) + "%" }} /></div></section>)}</div>
+  </div>;
+}
+
+function AICFO({ finance, overdue, invoices, notify }) {
+  const [messages, setMessages] = useState([{ role: "ai", text: "Your AI CFO is connected to this account's calculation context. Ask about your own numbers once you have transactions or invoices." }]);
+  const [input, setInput] = useState("");
+  const prompts = ["Can I spend ₹1.5L?", "Why is my safe-to-spend this amount?", "Which invoices are overdue?", "What is my runway?", "How much should I reserve?", "What if income falls 30%?"];
+
+  async function send(question) {
+    if (!question.trim()) return;
+    setMessages(rows => [...rows, { role: "user", text: question }]);
+    setInput("");
+    try {
+      const result = await api.askAI(question);
+      setMessages(rows => [...rows, { role: "ai", text: result.response.answer + " " + result.response.explanation }]);
+    } catch (error) {
+      notify(error.message);
+    }
+  }
+
+  return <div className="page"><Head eyebrow="Your financial copilot" title="AI CFO" text="The explanation layer uses server-side finance results from this account only." action={<Badge tone="success">Private context</Badge>} />
+    <div className="ai-layout"><section className="card chat-card"><div className="chat-head"><span className="ai-icon"><Bot size={17} /></span><div><b>Freelancer CFO</b><small>Calculation-aware · estimates labeled</small></div></div><div className="messages">{messages.map((message, index) => <div className={"message " + message.role} key={index}><span className="message-avatar">{message.role === "ai" ? <Bot size={13} /> : <UserRound size={13} />}</span><div>{message.text}</div></div>)}</div><div className="suggestions">{prompts.map(prompt => <button key={prompt} onClick={() => send(prompt)}>{prompt}</button>)}</div><div className="chat-input"><input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && send(input)} placeholder="Ask about your finances..." /><button onClick={() => send(input)}><Send size={15} /></button></div></section>
+      <aside className="card context-card"><h3>Financial context</h3><p>Read-only results for this user</p><ListRow title="Safe to spend" sub="" value={money(finance.safeToSpend)} /><ListRow title="Receivables" sub="" value={money(finance.receivables)} /><ListRow title="Runway" sub="" value={finance.runwayMonths.toFixed(1) + " mo"} /><ListRow title="Overdue" sub="" value={money(finance.overdueTotal)} /><div className="context-note">AI explains stored results. It does not invent missing data or replace critical calculations.</div></aside>
+    </div></div>;
+}
+
+function Settings({ user, finance, reload, notify }) {
+  const [form, setForm] = useState({ profession: user?.profession || "", tax: Math.round(finance.taxRate * 100), emergency: finance.emergencyReserve, incomeGoal: finance.monthlyIncomeGoal });
+  async function save() {
+    try {
+      await api.updateAssumptions({ taxReserveRate: Number(form.tax) / 100, emergencyReserveTarget: Number(form.emergency), monthlyIncomeGoal: Number(form.incomeGoal) });
+      await reload();
+      notify("Settings saved");
+    } catch (error) { notify(error.message); }
+  }
+  return <div className="page"><Head eyebrow="Control center" title="Settings" text="Your personal profile and financial assumptions." action={<Button icon={Check} onClick={save}>Save changes</Button>} />
+    <div className="settings-grid"><SettingsCard title="Profile" icon={<UserRound />}><label>Email<input value={user?.email || ""} readOnly /></label><label>Profession<input value={form.profession} onChange={e => setForm(v => ({ ...v, profession: e.target.value }))} /></label></SettingsCard><SettingsCard title="Financial assumptions" icon={<ShieldCheck />}><label>Tax reserve %<input type="number" value={form.tax} onChange={e => setForm(v => ({ ...v, tax: e.target.value }))} /></label><label>Emergency reserve<input type="number" value={form.emergency} onChange={e => setForm(v => ({ ...v, emergency: e.target.value }))} /></label><label>Monthly income goal<input type="number" value={form.incomeGoal} onChange={e => setForm(v => ({ ...v, incomeGoal: e.target.value }))} /></label></SettingsCard><SettingsCard title="Notifications" icon={<Bell />}><Toggle text="Overdue invoice alerts" on /><Toggle text="Low runway alerts" on /><Toggle text="Weekly finance summary" /></SettingsCard><SettingsCard title="Appearance & security" icon={<SettingsIcon />}><Toggle text="Light editorial theme" on /><Toggle text="Two-step verification" /><button className="danger-link">Log out of all devices</button></SettingsCard></div>
+  </div>;
+}
+
+function SettingsCard({ title, icon, children }) {
+  return <section className="card settings-card"><div className="settings-title">{icon}<div><h3>{title}</h3><p>Workspace preferences and controls.</p></div></div>{children}</section>;
+}
+
+function Toggle({ text, on: initial = false }) {
+  const [on, setOn] = useState(initial);
+  return <button className="toggle-row" onClick={() => setOn(!on)}><span>{text}</span><i className={on ? "on" : ""}><b /></i></button>;
+}
+
+function Reminder({ invoice, close, notify }) {
+  const invoiceNumber = invoice.invoiceNumber || invoice.id;
+  const [text, setText] = useState("Hi " + invoice.client + ",\n\nJust a quick reminder that invoice " + invoiceNumber + " for " + money(invoice.amount) + " is now due or overdue. Could you share an expected payment date?\n\nThanks");
+  async function saveDraft() {
+    try {
+      if (invoice._id) await api.reminderDraft(invoice._id);
+      close(); notify("Reminder draft saved");
+    } catch (error) { notify(error.message); }
+  }
+  return <div className="modal-backdrop" onMouseDown={close}><div className="modal" onMouseDown={e => e.stopPropagation()}><div className="modal-head"><div><p className="eyebrow">Draft only</p><h3>Payment reminder</h3></div><button onClick={close}><X size={17} /></button></div><p className="modal-note">AI-generated copy for review. Nothing will be sent.</p><textarea value={text} onChange={e => setText(e.target.value)} /><div className="modal-actions"><Button variant="secondary" onClick={close}>Cancel</Button><Button icon={Check} onClick={saveDraft}>Save draft</Button></div></div></div>;
+}
+
+function Auth({ setAuth, onAuthenticated, notify }) {
+  const [mode, setMode] = useState("login");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  async function submit(event) {
+    event.preventDefault();
+    try {
+      const result = mode === "signup"
+        ? await api.signup(name, email, password)
+        : await api.login(email, password);
+      localStorage.setItem("cfo_token", result.token);
+      setAuth(true);
+      onAuthenticated();
+    } catch (error) {
+      notify(error.message);
+    }
+  }
+
+  async function forgot() {
+    if (!email) return notify("Enter your email first");
+    try { await api.forgotPassword(email); notify("If the account exists, the reset flow has been started"); }
+    catch (error) { notify(error.message); }
+  }
+
+  return <div className="auth-shell"><form className="auth-card" onSubmit={submit}><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div><div className="auth-title"><p className="eyebrow">Private financial workspace</p><h1>{mode === "signup" ? "Create your CFO workspace" : "Welcome back"}</h1><p>Your data stays tied to the account you sign in with.</p></div>{mode === "signup" && <label>Name<input value={name} onChange={e => setName(e.target.value)} required placeholder="Your name" /></label>}<label>Email<input value={email} onChange={e => setEmail(e.target.value)} required type="email" placeholder="you@example.com" /></label><label>Password<input value={password} onChange={e => setPassword(e.target.value)} required minLength={8} type="password" placeholder="At least 8 characters" /></label><Button type="submit">{mode === "signup" ? "Create account" : "Log in"}</Button>{mode === "login" && <button type="button" className="text-button" onClick={forgot}>Forgot password?</button>}<p className="auth-switch">{mode === "signup" ? "Already have an account?" : "New here?"} <button type="button" onClick={() => setMode(mode === "signup" ? "login" : "signup")}>{mode === "signup" ? "Log in" : "Create an account"}</button></p></form></div>;
+}
+
+function Onboarding({ finish }) {
+  const [step, setStep] = useState(0);
+  const [form, setForm] = useState({ name: "", profession: "", monthlyIncome: "", monthlyExpenses: "", currentCash: "", taxReserveRate: "", emergencyReserveTarget: "", monthlyIncomeGoal: "" });
+  const steps = [
+    ["About you", [["name", "Name"], ["profession", "Profession"]]],
+    ["Cash picture", [["monthlyIncome", "Monthly income"], ["monthlyExpenses", "Monthly expenses"], ["currentCash", "Current cash"]]],
+    ["Reserves", [["taxReserveRate", "Tax reserve % (e.g. 22%)"], ["emergencyReserveTarget", "Emergency reserve target"]]],
+    ["Goal", [["monthlyIncomeGoal", "Monthly income goal"]]],
+  ];
+  function setField(key, value) {
+    setForm(values => ({ ...values, [key]: ["name", "profession"].includes(key) ? value : value }));
+  }
+  function next() {
+    if (step < 3) return setStep(step + 1);
+    const payload = {
+      ...form,
+      monthlyIncome: Number(form.monthlyIncome),
+      monthlyExpenses: Number(form.monthlyExpenses),
+      currentCash: Number(form.currentCash),
+      taxReserveRate: Number(form.taxReserveRate) / 100,
+      emergencyReserveTarget: Number(form.emergencyReserveTarget),
+      monthlyIncomeGoal: Number(form.monthlyIncomeGoal),
+    };
+    finish(payload);
+  }
+  const current = steps[step];
+  return <div className="onboarding"><div className="onboard-top"><div className="brand"><span className="brand-mark"><Sparkles size={16} /></span>Freelancer CFO</div><span>Step {step + 1} of 4</span></div><div className="progress"><i style={{ width: (step + 1) * 25 + "%" }} /></div><div className="onboard-card"><p className="eyebrow">Set up your guardrails</p><h1>{current[0]}</h1><p>These values belong only to your account and power your finance calculations.</p><div className="onboard-fields">{current[1].map(([key, label]) => <label key={key}>{label}<input value={form[key]} onChange={e => setField(key, e.target.value)} required type={["name", "profession"].includes(key) ? "text" : "number"} /></label>)}</div><div className="onboard-actions">{step > 0 && <Button variant="secondary" onClick={() => setStep(step - 1)}>Back</Button>}<Button onClick={next}>{step === 3 ? "Finish setup" : "Continue"}</Button></div></div></div>;
+}
+
 export default App;
