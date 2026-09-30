@@ -72,10 +72,14 @@ function App() {
       ]);
       setOnboard(false);
     } catch (error) {
-      api.logout();
-      setAuth(false);
-      setFinance(null);
-      notify(error.message);
+      if (error?.status === 401) {
+        api.logout();
+        setAuth(false);
+        setFinance(null);
+        notify(error?.code === "TOKEN_EXPIRED" ? "Your session has expired. Please log in again." : "Please log in to continue.");
+      } else {
+        notify(error?.message || "Temporarily unable to connect to the backend. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
