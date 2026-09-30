@@ -33,6 +33,14 @@ app.use(rateLimit({
   limit: 300,
   standardHeaders: "draft-7",
   legacyHeaders: false,
+  handler: (req, res, next, options) => {
+    res.status(options.statusCode).json({
+      error: {
+        code: "TOO_MANY_REQUESTS",
+        message: "Too many requests from this IP, please try again after 15 minutes."
+      }
+    });
+  }
 }));
 
 app.get("/api", (req, res) => {
