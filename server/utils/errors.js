@@ -27,3 +27,4 @@ export const tooManyRequests = (message = "Too many requests. Please try again l
 
 export const serviceUnavailable = (message = "Service temporarily unavailable", code = "SERVICE_UNAVAILABLE", details = undefined) =>
   new AppError(503, code, message, details);
+
