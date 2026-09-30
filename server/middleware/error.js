@@ -1,16 +1,19 @@
 import { AppError } from "../utils/errors.js";
 
 function isDatabaseError(err) {
+  if (err?.code === 11000 || err?.code === "11000") return false;
   const name = String(err?.name || "");
   const code = String(err?.code || "");
   const message = String(err?.message || "");
 
   return (
-    name.includes("Mongo") ||
-    name.includes("Mongoose") ||
     code === "ECONNREFUSED" ||
     code === "ENOTFOUND" ||
-    /MongoServerSelectionError|MongoNetworkError|topology was destroyed/i.test(message)
+    name === "MongooseServerSelectionError" ||
+    name === "MongoNetworkError" ||
+    name === "MongoServerSelectionError" ||
+    name === "MongoTimeoutError" ||
+    /MongoServerSelectionError|MongoNetworkError|topology was destroyed|timed out/i.test(message)
   );
 }
 
@@ -25,6 +28,19 @@ export function errorHandler(err, req, res, next) {
         code: "VALIDATION_ERROR",
         message: "Invalid request data",
         details: err.errors
+      }
+    });
+  }
+
+  // Handle MongoDB duplicate key errors (code 11000)
+  if (err?.code === 11000 || err?.code === "11000") {
+    const fields = Object.keys(err.keyPattern || err.keyValue || {});
+    const fieldName = fields[0] || "field";
+    return res.status(409).json({
+      error: {
+        code: "DUPLICATE_KEY",
+        message: `An account or record with this ${fieldName} already exists.`,
+        details: { fields }
       }
     });
   }
