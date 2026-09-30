@@ -61,12 +61,24 @@ The server builds trusted financial context from the authenticated user's record
 
 ## Error shape
 
-    {
-      "error": {
-        "code": "VALIDATION_ERROR",
-        "message": "Human-readable message"
-      }
-    }
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Human-readable message",
+    "details": {}
+  }
+}
+```
+
+### Standard Status Codes & Error Codes
+- **400 Bad Request**: `VALIDATION_ERROR`, `INVALID_RESET_TOKEN`, `INVALID_INVITE_TOKEN`
+- **401 Unauthorized**: `UNAUTHORIZED`, `INVALID_CREDENTIALS`, `TOKEN_REQUIRED`, `TOKEN_EXPIRED`, `INVALID_TOKEN`, `USER_NOT_FOUND`
+- **403 Forbidden**: `FORBIDDEN`, `PLAN_UPGRADE_REQUIRED`, `INSUFFICIENT_PERMISSIONS`
+- **404 Not Found**: `NOT_FOUND`, `WORKSPACE_UNAVAILABLE`
+- **409 Conflict**: `USER_ALREADY_EXISTS`, `DUPLICATE_KEY`
+- **429 Too Many Requests**: `TOO_MANY_REQUESTS` (Rate limit: 25 requests per 15m on auth endpoints)
+- **503 Service Unavailable**: `DATABASE_UNAVAILABLE`, `AUTH_SERVICE_UNAVAILABLE`
 
 Financial calculations are never accepted from client totals as a source of truth.
 
