@@ -12,22 +12,43 @@ export default function Auth({ initialMode = "login", close, setAuth, onAuthenti
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [errorDetails, setErrorDetails] = useState(null);
 
   function changeMode(nextMode) {
     setMode(nextMode);
     setError("");
+    setErrorDetails(null);
   }
 
   async function authenticate(action) {
     setBusy(true);
     setError("");
+    setErrorDetails(null);
     try {
       const result = await action();
       setAuth(true);
       await onAuthenticated?.(result.user);
     } catch (error) {
-      const message = error?.message || "Unable to complete authentication.";
+      const isConflict = error?.status === 409 || error?.code === "USER_ALREADY_EXISTS" || error?.code === "DUPLICATE_KEY";
+      const isRateLimited = error?.status === 429;
+      const isServiceUnavailable = error?.status === 503;
+
+      let message = error?.message || "Unable to complete authentication.";
+      if (isConflict) {
+        message = "An account with that email already exists.";
+      } else if (isRateLimited) {
+        message = "Too many attempts. Please wait a few moments before trying again.";
+      } else if (isServiceUnavailable) {
+        message = "The authentication service is temporarily unavailable. Please retry shortly.";
+      }
+
       setError(message);
+      setErrorDetails({
+        status: error?.status,
+        code: error?.code,
+        isConflict,
+        fieldErrors: error?.details?.fieldErrors || null,
+      });
       notify?.(message);
     } finally {
       setBusy(false);
@@ -83,12 +104,45 @@ export default function Auth({ initialMode = "login", close, setAuth, onAuthenti
       {!inviteToken && <div className="auth-switch auth-mode-switch"><button type="button" className={mode !== "company-signup" ? "active" : ""} onClick={() => changeMode("login")}>User</button><button type="button" className={mode === "company-signup" ? "active" : ""} onClick={() => changeMode("company-signup")}>Company</button></div>}
       {mode === "login" && <div className="auth-inline-choice"><button type="button" className="text-button" onClick={() => changeMode("signup")}>Create user account</button><button type="button" className="text-button" onClick={() => changeMode("company-signup")}>Create company</button></div>}
 
-      {error && <div className="auth-error" role="alert"><AlertCircle size={15} /><span>{error}</span></div>}
+      {error && (
+        <div className="auth-error" role="alert">
+          <AlertCircle size={15} />
+          <div style={{ display: "inline" }}>
+            <span>{error}</span>
+            {errorDetails?.isConflict && mode !== "login" && (
+              <button
+                type="button"
+                className="text-button"
+                style={{ marginLeft: "8px", textDecoration: "underline", fontWeight: 600, display: "inline" }}
+                onClick={() => changeMode("login")}
+              >
+                Log in instead?
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
-      {(mode === "signup" || mode === "company-signup") && <label>Name<input value={name} onChange={e => setName(e.target.value)} required placeholder="Your name" /></label>}
-      {mode === "company-signup" && <label>Company name<input value={companyName} onChange={e => setCompanyName(e.target.value)} required placeholder="Your company" /></label>}
-      <label>Email<input value={email} onChange={e => setEmail(e.target.value)} required type="email" placeholder="you@example.com" autoComplete="email" /></label>
-      <label>Password<input value={password} onChange={e => setPassword(e.target.value)} required minLength={8} type="password" placeholder="At least 8 characters" autoComplete={mode === "login" ? "current-password" : "new-password"} /></label>
+      {(mode === "signup" || mode === "company-signup") && <label>Name<input value={name} onChange={e => { setName(e.target.value); setError(""); }} required placeholder="Your name" /></label>}
+      {mode === "company-signup" && <label>Company name<input value={companyName} onChange={e => { setCompanyName(e.target.value); setError(""); }} required placeholder="Your company" /></label>}
+      <label>
+        Email
+        <input value={email} onChange={e => { setEmail(e.target.value); setError(""); }} required type="email" placeholder="you@example.com" autoComplete="email" />
+      </label>
+      {errorDetails?.fieldErrors?.email && (
+        <p style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: "-6px", marginBottom: "8px" }}>
+          {errorDetails.fieldErrors.email[0]}
+        </p>
+      )}
+      <label>
+        Password
+        <input value={password} onChange={e => { setPassword(e.target.value); setError(""); }} required minLength={8} type="password" placeholder="At least 8 characters" autoComplete={mode === "login" ? "current-password" : "new-password"} />
+      </label>
+      {errorDetails?.fieldErrors?.password && (
+        <p style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: "-6px", marginBottom: "8px" }}>
+          {errorDetails.fieldErrors.password[0]}
+        </p>
+      )}
 
       <Button type="submit" disabled={busy}>{busy ? "Please wait…" : mode === "company-signup" ? "Create company" : mode === "signup" ? "Create account" : "Log in"}</Button>
       {mode === "login" && <button type="button" className="text-button" onClick={forgot} disabled={busy}>Forgot password?</button>}
