@@ -3,16 +3,60 @@ const API_BASE = isLocalHost
   ? (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000")
   : "";
 
-async function request(path, options = {}, token = localStorage.getItem("cfo_token")) {
+export class ApiError extends Error {
+  constructor(message, status = 500, code = "UNKNOWN_ERROR", details = null) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.code = code;
+    this.details = details;
+  }
+
+  get isAuthError() {
+    return this.status === 401;
+  }
+
+  get isTokenExpired() {
+    return this.status === 401 && this.code === "TOKEN_EXPIRED";
+  }
+
+  get isForbidden() {
+    return this.status === 403;
+  }
+
+  get isConflict() {
+    return this.status === 409;
+  }
+
+  get isRateLimited() {
+    return this.status === 429;
+  }
+
+  get isServerError() {
+    return this.status >= 500;
+  }
+}
+
+async function request(path, options = {}, token = localStorage.getItem("cfo_token"), retryCount = 0) {
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
   if (token) headers.Authorization = "Bearer " + token;
 
+  const method = (options.method || "GET").toUpperCase();
   let response;
   try {
     response = await fetch(API_BASE + path, { ...options, headers });
   } catch (error) {
+    // Retry once for idempotent GET network drops
+    if (method === "GET" && retryCount < 1) {
+      await new Promise(r => setTimeout(r, 600));
+      return request(path, options, token, retryCount + 1);
+    }
     const host = API_BASE || window.location.origin;
-    throw new Error("Cannot reach the backend at " + host + ". Start the API server or configure the production backend.");
+    throw new ApiError(
+      `Cannot reach the backend at ${host}. Please check your connection or start the API server.`,
+      0,
+      "NETWORK_ERROR"
+    );
   }
 
   const raw = await response.text();
@@ -24,9 +68,25 @@ async function request(path, options = {}, token = localStorage.getItem("cfo_tok
   }
 
   if (!response.ok) {
+    // Retry once for transient 502/503/504 gateway or DB startup errors on GET
+    if (method === "GET" && (response.status === 502 || response.status === 503 || response.status === 504) && retryCount < 1) {
+      await new Promise(r => setTimeout(r, 800));
+      return request(path, options, token, retryCount + 1);
+    }
+
     const message = payload?.error?.message
-      || ("Request failed (" + response.status + ") for " + API_BASE + path);
-    throw new Error(message);
+      || (response.status === 503
+        ? "Service is temporarily unavailable. Please try again shortly."
+        : response.status === 429
+          ? "Too many requests. Please try again in a few minutes."
+          : `Request failed (${response.status}) for ${path}`);
+
+    const code = payload?.error?.code
+      || (response.status === 401 ? "UNAUTHORIZED" : response.status >= 500 ? "SERVER_ERROR" : "CLIENT_ERROR");
+
+    const details = payload?.error?.details || null;
+
+    throw new ApiError(message, response.status, code, details);
   }
 
   return payload;
