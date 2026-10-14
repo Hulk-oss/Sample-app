@@ -17,7 +17,7 @@ import PublicPages from "./pages/PublicPages";
 import Auth from "./features/auth/Auth";
 import GuestWorkspace from "./features/preview/GuestWorkspace";
 import { userNavigation as nav } from "./app/navigation";
-import { filterUserNavigation, isUserFeatureEnabled } from "./pricing";
+import { featureLabels, filterUserNavigation, getRequiredPlanName, isUserFeatureEnabled } from "./pricing";
 import { Badge, Button, ChartCard, EmptyState, Head, Kpi } from "./components/ui/Primitives";
 import { Billing, Help, Notifications } from "./features/account/AccountPages";
 
@@ -217,7 +217,7 @@ function App() {
     <main className="main">
       <header className="topbar">
         <button className="mobile-menu" onClick={() => setSidebar(!sidebar)}><Menu size={19} /></button>
-        <b>{activeNav.find(row => row[0] === page)?.[1] || "Overview"}</b>
+        <b>{activeNav.find(row => row[0] === page)?.[1] || featureLabels[page] || "Overview"}</b>
         <div className="top-actions">
           <select><option>90 days</option><option>This month</option><option>6 months</option></select>
           <button className="icon-button"><Bell size={15} /><i /></button>
@@ -226,17 +226,21 @@ function App() {
       </header>
 
       <div className="content">
-        {page === "dashboard" && <Dashboard {...common} />}
-        {page === "transactions" && <Transactions data={transactions} query={query} setQuery={setQuery} add={addTransaction} setModal={setModal} reload={loadWorkspace} notify={notify} />}
-        {page === "invoices" && <Invoices data={invoices} markPaid={markPaid} setModal={setModal} reload={loadWorkspace} notify={notify} />}
-        {page === "cashflow" && <CashFlow data={cashData} />}
-        {page === "tax" && <TaxReserve finance={finance} reload={loadWorkspace} notify={notify} />}
-        {page === "runway" && <Runway finance={finance} />}
-        {page === "ai" && <AICFO finance={finance} overdue={overdue} invoices={invoices} notify={notify} />}
-        {page === "settings" && <Settings user={user} finance={finance} reload={loadWorkspace} notify={notify} />}
-        {page === "billing" && <Billing user={user} setPage={setPage} />}
-        {page === "notifications" && <Notifications finance={finance} overdue={overdue} setPage={setPage} />}
-        {page === "help" && <Help />}
+        {!isUserFeatureEnabled(user, page) ? (
+          <PlanLockedContent user={user} page={page} setPage={setPage} />
+        ) : <>
+          {page === "dashboard" && <Dashboard {...common} />}
+          {page === "transactions" && <Transactions data={transactions} query={query} setQuery={setQuery} add={addTransaction} setModal={setModal} reload={loadWorkspace} notify={notify} />}
+          {page === "invoices" && <Invoices data={invoices} markPaid={markPaid} setModal={setModal} reload={loadWorkspace} notify={notify} />}
+          {page === "cashflow" && <CashFlow data={cashData} />}
+          {page === "tax" && <TaxReserve finance={finance} reload={loadWorkspace} notify={notify} />}
+          {page === "runway" && <Runway finance={finance} />}
+          {page === "ai" && <AICFO finance={finance} overdue={overdue} invoices={invoices} notify={notify} />}
+          {page === "settings" && <Settings user={user} finance={finance} reload={loadWorkspace} notify={notify} />}
+          {page === "billing" && <Billing user={user} setPage={setPage} />}
+          {page === "notifications" && <Notifications finance={finance} overdue={overdue} setPage={setPage} />}
+          {page === "help" && <Help />}
+        </>}
       </div>
     </main>
 
@@ -574,3 +578,32 @@ function Onboarding({ finish }) {
 }
 
 export default App;
+
+
+function PlanLockedContent({ user, page, setPage }) {
+  const featureName = featureLabels[page] || "This feature";
+  const requiredPlan = getRequiredPlanName(user, page);
+  const canOpenBilling = isUserFeatureEnabled(user, "billing");
+  const isOrganization = Boolean(user?.companyId);
+
+  return <div className="page plan-locked-page">
+    <div className="hero-row">
+      <div>
+        <p className="eyebrow">{isOrganization ? "Organization plan" : "Plan access"}</p>
+        <h1>{featureName} is not included in your current plan.</h1>
+        <p>This workspace section is reserved for {requiredPlan}. The app checks your account's assigned plan before showing premium feature data or controls.</p>
+      </div>
+    </div>
+    <section className="card plan-locked-card">
+      <span className="plan-locked-icon"><ShieldCheck size={22}/></span>
+      <p className="eyebrow">Premium feature</p>
+      <h2>{featureName}</h2>
+      <p>{featureName} becomes available when the appropriate plan has been assigned to your account. This does not change your records or current subscription.</p>
+      <div className="plan-locked-actions">
+        {canOpenBilling && <Button icon={CreditCard} onClick={() => setPage("billing")}>Review current plan</Button>}
+        <Button variant="secondary" onClick={() => setPage("dashboard")}>Back to overview</Button>
+      </div>
+      <small>Paid checkout is not configured in this deployment yet. Access should only be upgraded after a verified subscription or trusted plan assignment.</small>
+    </section>
+  </div>;
+}
