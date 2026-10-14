@@ -79,7 +79,7 @@ router.post("/signup", authLimiter, async (req, res) => {
     passwordHash,
     role: env.platformOwnerEmail && data.email.toLowerCase() === env.platformOwnerEmail ? "platform_owner" : "user",
     companyId,
-    plan: data.plan,
+    plan: "free",
   });
 
   if (invite) {
@@ -130,36 +130,13 @@ router.post("/login", authLimiter, async (req, res) => {
 });
 
 router.post("/company-signup", authLimiter, async (req, res) => {
-  const data = parse(companySignupSchema, req.body);
-  const exists = await User.findOne({ email: data.email.toLowerCase() });
-  if (exists) throw conflict("An account with that email already exists.", "USER_ALREADY_EXISTS");
-
-  const passwordHash = await bcrypt.hash(data.password, 12);
-  const companySeatLimits = { starter: 5, growth: 25, scale: 100 };
-  const user = await User.create({
-    name: data.name,
-    email: data.email.toLowerCase(),
-    passwordHash,
-    role: env.platformOwnerEmail && data.email.toLowerCase() === env.platformOwnerEmail ? "platform_owner" : "company_admin",
-    onboardingComplete: true,
-    plan: "free",
-  });
-
-  const company = await Company.create({
-    name: data.companyName,
-    ownerUserId: user._id,
-    plan: data.plan,
-    seatLimit: companySeatLimits[data.plan],
-  });
-
-  user.companyId = company._id;
-  await user.save();
-
-  res.status(201).json({
-    token: issueToken(user),
-    user: publicUser(user),
-    company: { id: company._id, name: company.name, plan: company.plan, seatLimit: company.seatLimit },
-  });
+  // Organization tiers are all paid. Never trust a client-submitted plan to grant
+  // seats or paid features: checkout and server-side payment verification must exist first.
+  parse(companySignupSchema, req.body);
+  throw serviceUnavailable(
+    "Organization plan checkout is not configured yet. Paid organization access cannot be activated until payment verification is enabled.",
+    "BILLING_NOT_CONFIGURED"
+  );
 });
 
 router.post("/forgot-password", authLimiter, async (req, res) => {
