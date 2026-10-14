@@ -28,7 +28,7 @@ function App() {
   const [sidebar, setSidebar] = useState(false);
   const [auth, setAuth] = useState(Boolean(localStorage.getItem("cfo_token")));
   const [authOpen, setAuthOpen] = useState(false);
-  const [guestMode, setGuestMode] = useState(() => !localStorage.getItem("cfo_token") && !new URLSearchParams(window.location.search).has("invite"));
+  const [guestMode, setGuestMode] = useState(() => !new URLSearchParams(window.location.search).has("invite"));
   const [publicPage, setPublicPage] = useState(null);
   const [onboard, setOnboard] = useState(false);
   const [user, setUser] = useState(null);
@@ -97,8 +97,10 @@ function App() {
   }
 
   useEffect(() => {
-    if (auth) loadWorkspace();
-  }, [auth]);
+    // Guest preview is the default while authentication is temporarily paused.
+    // Do not hit protected APIs just because an old token remains in localStorage.
+    if (auth && !guestMode) loadWorkspace();
+  }, [auth, guestMode]);
 
   async function finishOnboarding(values) {
     try {
