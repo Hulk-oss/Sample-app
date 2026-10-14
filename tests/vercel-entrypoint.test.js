@@ -6,7 +6,7 @@ test("shared Vercel handler exports a request handler", async () => {
   assert.equal(typeof module.default, "function");
 });
 
-test("Vercel API catch-all exports the shared request handler", async () => {
-  const module = await import("../api/[...path].js");
+test("Vercel API handler exports a request handler", async () => {
+  const module = await import("../api/handler.js");
   assert.equal(typeof module.default, "function");
 });
