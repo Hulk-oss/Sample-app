@@ -125,10 +125,17 @@ function App() {
     setAuthOpen(mode);
   }
 
-  function openWebsite() {
+  function openWebsite(targetPage = null) {
+    api.logout();
+    setAuth(false);
+    setUser(null);
+    setFinance(null);
+    setTransactions([]);
+    setInvoices([]);
+    setCashData([]);
     setGuestMode(false);
     setAuthOpen(false);
-    setPublicPage(null);
+    setPublicPage(targetPage);
     setPage("dashboard");
   }
 
