@@ -39,7 +39,9 @@ export default function Auth({ initialMode = "login", close, setAuth, onAuthenti
       } else if (isRateLimited) {
         message = "Too many attempts. Please wait a few moments before trying again.";
       } else if (isServiceUnavailable) {
-        message = "The authentication service is temporarily unavailable. Please retry shortly.";
+        // Preserve the safe diagnostic message returned by the API (for example,
+        // missing production configuration or an unreachable database).
+        message = error?.message || "The authentication service is temporarily unavailable. Please retry shortly.";
       }
 
       setError(message);
@@ -109,6 +111,11 @@ export default function Auth({ initialMode = "login", close, setAuth, onAuthenti
           <AlertCircle size={15} />
           <div style={{ display: "inline" }}>
             <span>{error}</span>
+            {errorDetails?.status != null && (
+              <small style={{ display: "block", marginTop: "6px", opacity: 0.78, fontSize: "0.78rem", lineHeight: 1.4 }}>
+                HTTP {errorDetails.status}{errorDetails.code ? " · " + errorDetails.code : ""}
+              </small>
+            )}
             {errorDetails?.isConflict && mode !== "login" && (
               <button
                 type="button"
