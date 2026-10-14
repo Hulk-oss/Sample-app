@@ -15,6 +15,7 @@ import PlatformPortal from "./features/platform/PlatformPortal";
 import LandingPage from "./LandingPage";
 import PublicPages from "./pages/PublicPages";
 import Auth from "./features/auth/Auth";
+import GuestWorkspace from "./features/preview/GuestWorkspace";
 import { userNavigation as nav } from "./app/navigation";
 import { filterUserNavigation, isUserFeatureEnabled } from "./pricing";
 import { Badge, Button, ChartCard, EmptyState, Head, Kpi } from "./components/ui/Primitives";
@@ -27,6 +28,7 @@ function App() {
   const [sidebar, setSidebar] = useState(false);
   const [auth, setAuth] = useState(Boolean(localStorage.getItem("cfo_token")));
   const [authOpen, setAuthOpen] = useState(false);
+  const [guestMode, setGuestMode] = useState(() => !localStorage.getItem("cfo_token") && !new URLSearchParams(window.location.search).has("invite"));
   const [publicPage, setPublicPage] = useState(null);
   const [onboard, setOnboard] = useState(false);
   const [user, setUser] = useState(null);
@@ -72,11 +74,20 @@ function App() {
       ]);
       setOnboard(false);
     } catch (error) {
-      if (error?.status === 401) {
-        api.logout();
+      const canPreviewWithoutBackend = error?.status === 401
+        || (error?.status === 503 && ["DATABASE_UNAVAILABLE", "MISSING_PRODUCTION_CONFIG"].includes(error?.code));
+
+      if (canPreviewWithoutBackend) {
+        if (error?.status === 401) api.logout();
         setAuth(false);
+        setGuestMode(true);
+        setUser(null);
         setFinance(null);
-        notify(error?.code === "TOKEN_EXPIRED" ? "Your session has expired. Please log in again." : "Please log in to continue.");
+        setTransactions([]);
+        setInvoices([]);
+        setCashData([]);
+        setOnboard(false);
+        notify("Opened temporary preview mode. No financial data has been loaded.");
       } else {
         notify(error?.message || "Temporarily unable to connect to the backend. Please try again.");
       }
@@ -100,6 +111,25 @@ function App() {
     }
   }
 
+  function openAuth(mode = "login") {
+    api.logout();
+    setAuth(false);
+    setUser(null);
+    setFinance(null);
+    setTransactions([]);
+    setInvoices([]);
+    setCashData([]);
+    setGuestMode(false);
+    setAuthOpen(mode);
+  }
+
+  function openWebsite() {
+    setGuestMode(false);
+    setAuthOpen(false);
+    setPublicPage(null);
+    setPage("dashboard");
+  }
+
   function logout() {
     api.logout();
     setAuth(false);
@@ -108,6 +138,7 @@ function App() {
     setTransactions([]);
     setInvoices([]);
     setCashData([]);
+    setGuestMode(true);
   }
 
   function addTransaction() { setModal({ type: "transaction" }); }
@@ -123,18 +154,27 @@ function App() {
     }
   }
 
+  if (guestMode) {
+    return <GuestWorkspace
+      page={page}
+      setPage={setPage}
+      onSignIn={openAuth}
+      onWebsite={openWebsite}
+    />;
+  }
+
   if (!auth) {
     if (publicPage) {
       return <PublicPages
         page={publicPage}
         onNavigate={setPublicPage}
         onBack={() => setPublicPage(null)}
-        onAuth={mode => { setPublicPage(null); setAuthOpen(mode); }}
+        onAuth={mode => { setPublicPage(null); openAuth(mode); }}
       />;
     }
     return <>
       <LandingPage
-        onAuth={mode => setAuthOpen(mode)}
+        onAuth={openAuth}
         onNavigate={setPublicPage}
       />
       {authOpen && <Auth initialMode={authOpen} close={() => setAuthOpen(false)} setAuth={setAuth} onAuthenticated={loadWorkspace} notify={notify} />}
