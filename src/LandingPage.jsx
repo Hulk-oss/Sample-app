@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, ArrowUpRight, Check, Clock3, Instagram, Menu, WalletCards } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, Menu, WalletCards } from "lucide-react";
 
 const webIcon = name => "https://api.iconify.design/" + name + ".svg?color=%23131312";
 
@@ -26,15 +26,15 @@ const categoryData = [
 ];
 
 const cards = [
-  [photos.desk, "See your cash clearly", "Cash position", "Know what is available before you make the next move.", "32 min"],
-  [photos.creative, "Keep every invoice moving", "Invoices", "Create, track and follow up without a crowded finance screen.", "18 min"],
-  [photos.tax, "Protect what is not yours to spend", "Tax Reserve", "Keep tax and emergency money visible before it gets used.", "24 min"],
-  [photos.office, "Know how long you can operate", "Runway", "Understand your current pace and what changes the picture.", "20 min"],
-  [photos.plan, "Turn activity into a plan", "Planning", "Compare what happened with what you want next month to look like.", "16 min"],
-  [photos.notes, "Ask the number a better question", "AI CFO", "Get explanations grounded in your own finance workspace.", "8 min"],
-  [photos.papers, "See upcoming outflows", "Cash Flow", "Keep the next 30 days visible without losing the bigger picture.", "14 min"],
-  [photos.laptop, "Build your monthly target", "Income Goal", "Give your work a clear financial target and track it.", "12 min"],
-  [photos.planner, "Make decisions with context", "Scenarios", "Use the runway and reserve view before committing to a spend.", "10 min"],
+  [photos.desk, "See your cash clearly", "Cash position", "Know what is available before you make the next move."],
+  [photos.creative, "Keep every invoice moving", "Invoices", "Create, track and follow up without a crowded finance screen."],
+  [photos.tax, "Protect what is not yours to spend", "Tax Reserve", "Keep tax and emergency money visible before it gets used."],
+  [photos.office, "Know how long you can operate", "Runway", "Understand your current pace and what changes the picture."],
+  [photos.plan, "Turn activity into a plan", "Planning", "Compare what happened with what you want next month to look like."],
+  [photos.notes, "Ask the number a better question", "AI CFO", "Get explanations grounded in your own finance workspace."],
+  [photos.papers, "See upcoming outflows", "Cash Flow", "Keep the next 30 days visible without losing the bigger picture."],
+  [photos.laptop, "Build your monthly target", "Income Goal", "Give your work a clear financial target and track it."],
+  [photos.planner, "Make decisions with context", "Scenarios", "Use the runway and reserve view before committing to a spend."],
 ];
 
 function Icon({ name, className = "" }) {
@@ -47,11 +47,12 @@ function Brand() {
 
 function LandingPage({ onAuth, onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [subscribed, setSubscribed] = useState(false);
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-
   useEffect(() => {
     const nodes = document.querySelectorAll(".foodie-reveal");
+    if (!("IntersectionObserver" in window)) {
+      nodes.forEach(node => node.classList.add("is-visible"));
+      return undefined;
+    }
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -63,13 +64,6 @@ function LandingPage({ onAuth, onNavigate }) {
     nodes.forEach(node => observer.observe(node));
     return () => observer.disconnect();
   }, []);
-
-  const submitNewsletter = event => {
-    event.preventDefault();
-    if (!newsletterEmail.trim()) return;
-    localStorage.setItem("cfo_newsletter_email", newsletterEmail.trim());
-    setSubscribed(true);
-  };
 
   const jump = id => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -89,7 +83,6 @@ function LandingPage({ onAuth, onNavigate }) {
           <button onClick={() => onNavigate?.("pricing")}>Pricing</button>
         </nav>
         <div className="foodie-header-right">
-          <button className="foodie-social" aria-label="Open Instagram" onClick={() => window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer")}><Instagram size={14} /></button>
           <button className="foodie-login" onClick={() => onAuth("login")}>Log in</button>
           <button className="foodie-black-btn" onClick={() => onAuth("signup")}>Get started</button>
         </div>
@@ -114,7 +107,7 @@ function LandingPage({ onAuth, onNavigate }) {
             <h1>Simple financial clarity <em>for your business.</em></h1>
             <p>Track your cash, invoices, reserves and runway in one simple place. Make better money decisions without the finance clutter.</p>
             <div className="foodie-meta-row">
-              <span><Clock3 size={12} /> Your own data</span>
+              <span><WalletCards size={12} /> Your own data</span>
               <span><Check size={12} /> No demo data</span>
             </div>
             <button className="foodie-black-btn foodie-hero-btn" onClick={() => onAuth("signup")}>View my finances <ArrowUpRight size={14} /></button>
@@ -131,8 +124,8 @@ function LandingPage({ onAuth, onNavigate }) {
 
         <section className="foodie-section foodie-categories foodie-reveal" id="categories">
           <div className="foodie-section-head">
-            <h2>Categories</h2>
-            <button className="foodie-outline-btn" onClick={() => onAuth("signup")}>View all features</button>
+            <h2>Your finances, organized</h2>
+            <button className="foodie-outline-btn" onClick={() => onAuth("signup")}>Explore all tools</button>
           </div>
           <div className="foodie-category-grid">
             {categoryData.map(([icon, title, image, tone]) => (
@@ -147,11 +140,11 @@ function LandingPage({ onAuth, onNavigate }) {
 
         <section className="foodie-section foodie-reveal" id="recipes">
           <div className="foodie-centered-head">
-            <h2>Simple and useful finance</h2>
-            <p>Understand cash, invoices and planning with the same clean visual flow from one screen to the next.</p>
+            <h2>Financial tools that work together</h2>
+            <p>Bring cash, invoices, tax reserves and runway into one clear view, using the financial records you enter.</p>
           </div>
           <div className="foodie-recipe-grid">
-            {cards.map(([image, title, tag, text, time], index) => (
+            {cards.map(([image, title, tag, text]) => (
               <article className="foodie-recipe-card foodie-reveal-item" key={title}>
                 <div className="foodie-recipe-image">
                   <button className="foodie-recipe-open" onClick={() => onAuth("signup")} aria-label={"Open " + title}>
@@ -161,7 +154,6 @@ function LandingPage({ onAuth, onNavigate }) {
                 <h3>{title}</h3>
                 <p>{text}</p>
                 <div className="foodie-recipe-info">
-                  <span><Clock3 size={10} /> {time}</span>
                   <span><Icon name="mdi:tag-outline" /> {tag}</span>
                 </div>
               </article>
@@ -184,8 +176,8 @@ function LandingPage({ onAuth, onNavigate }) {
 
         <section className="foodie-section foodie-instagram foodie-reveal" id="ai">
           <div className="foodie-centered-head">
-            <h2>Check out @freelancerCFO</h2>
-            <p>Cash, invoices, reserves and runway — presented with the same calm visual rhythm throughout your workspace.</p>
+            <h2>One workspace for better decisions</h2>
+            <p>Get a focused view of what is available, what is due, what stays protected and what comes next.</p>
           </div>
           <div className="foodie-instagram-grid">
             {[
@@ -205,19 +197,13 @@ function LandingPage({ onAuth, onNavigate }) {
 
         <section className="foodie-newsletter foodie-reveal">
           <div>
-            <h2>Clarity to your <br />inbox.</h2>
-            <p>Product updates, practical finance notes and new tools for independent professionals.</p>
+            <h2>Make your next move with clarity.</h2>
+            <p>Bring your own numbers into one calm workspace for cash, invoices, reserves and runway.</p>
           </div>
-          <form className={"foodie-newsletter-form " + (subscribed ? "is-subscribed" : "")} onSubmit={submitNewsletter}>
-            {!subscribed ? (
-              <>
-                <input type="email" placeholder="Your email address..." aria-label="Email address" required value={newsletterEmail} onChange={event => setNewsletterEmail(event.target.value)} />
-                <button className="foodie-black-btn" type="submit">Subscribe <ArrowRight size={13} /></button>
-              </>
-            ) : (
-              <div className="foodie-newsletter-success"><Check size={14} /> You're on the list.</div>
-            )}
-          </form>
+          <div className="foodie-newsletter-form foodie-newsletter-cta">
+            <button className="foodie-black-btn" type="button" onClick={() => onAuth("signup")}>Create your workspace <ArrowRight size={16} /></button>
+            <span>No demo data. Start with your own financial picture.</span>
+          </div>
         </section>
       </main>
 
