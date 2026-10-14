@@ -1,4 +1,5 @@
-import { ArrowLeft, Check, Mail, ShieldCheck, Users, WalletCards } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Check, LockKeyhole, Mail, ShieldCheck, Users, WalletCards } from "lucide-react";
 
 const individualPlans = [
   {
@@ -72,18 +73,29 @@ function Shell({ title, intro, active, onNavigate, children, onBack }) {
 }
 
 export default function PublicPages({ page, onNavigate, onBack, onAuth }) {
+  const [planNotice, setPlanNotice] = useState("");
+
   if(page === "pricing") {
     return <Shell title="Pricing" intro="Choose the workspace that matches how you work." active="pricing" onNavigate={onNavigate} onBack={onBack}>
       <div className="pricing-switch-copy">
         <p>Individual plans are designed for one professional. Organization plans are designed for a company managing employee access, seats and onboarding.</p>
       </div>
+      {planNotice && <div className="plan-availability-note" role="status"><LockKeyhole size={17}/><div><strong>Paid checkout is not enabled yet</strong><p>{planNotice} The plan is displayed for comparison, but premium access cannot be activated until a payment provider and server-side payment verification are configured.</p></div></div>}
       <section className="pricing-group">
         <div className="pricing-group-head"><div><h2>For individuals</h2><p>Use your own account and your own financial records.</p></div><WalletCards size={20} /></div>
         <div className="pricing-grid">{individualPlans.map(plan => <article className="pricing-card" key={plan.id}>
           <div className="pricing-card-top"><span className="pricing-label">{plan.name}</span><strong>{plan.price}</strong><small>{plan.period}</small></div>
           <p>{plan.description}</p>
           <div className="pricing-features">{plan.features.map(feature => <span key={feature}><Check size={14} />{feature}</span>)}</div>
-          <button className="public-primary" onClick={() => { localStorage.setItem("cfo_selected_plan", plan.id); onAuth("signup"); }}>{plan.action}</button>
+          <button className="public-primary" onClick={() => {
+            if (plan.id === "free") {
+              localStorage.setItem("cfo_selected_plan", "free");
+              setPlanNotice("");
+              onAuth("signup");
+            } else {
+              setPlanNotice("Individual Pro includes Cash Flow, Tax Reserve, Runway and AI CFO.");
+            }
+          }}>{plan.id === "free" ? plan.action : "Compare Pro features"}</button>
         </article>)}</div>
       </section>
       <section className="pricing-group">
@@ -94,9 +106,8 @@ export default function PublicPages({ page, onNavigate, onBack, onAuth }) {
           <div className="pricing-features">{plan.features.map(feature => <span key={feature}><Check size={14} />{feature}</span>)}</div>
           <button className="public-primary" onClick={() => {
             if (plan.id === "scale") return onNavigate("contact");
-            localStorage.setItem("cfo_selected_company_plan", plan.id);
-            onAuth("company");
-          }}>{plan.action}</button>
+            setPlanNotice(plan.name + " requires payment verification before organization features or seats can be activated.");
+          }}>View plan access</button>
         </article>)}</div>
       </section>
     </Shell>;
