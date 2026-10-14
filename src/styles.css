@@ -3379,3 +3379,19 @@ body,
   .foodie-reveal,
   .foodie-reveal-item { opacity: 1 !important; transform: none !important; }
 }
+
+
+/* Keep the header usable between small tablets and desktop widths */
+@media (min-width: 721px) and (max-width: 820px) {
+  .foodie-nav,
+  .foodie-header-right { display: none; }
+  .foodie-menu-btn {
+    display: flex;
+    width: 44px;
+    height: 44px;
+    margin-left: auto;
+    border-radius: 10px;
+  }
+  .foodie-mobile-menu { top: calc(100% - 4px); min-width: 220px; padding: 10px; }
+  .foodie-mobile-menu button { min-height: 42px; padding: 10px 12px; font-size: 14px; }
+}
