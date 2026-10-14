@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Activity, ArrowDownRight, ArrowRight, ArrowUpRight, BarChart3, Bell, Bot, CalendarDays,
+  Activity, ArrowDownRight, ArrowRight, ArrowUpRight, Bell, Bot, CalendarDays,
   Check, ChevronRight, CircleHelp, CreditCard, FileText, Globe, Info, LockKeyhole, LogIn,
   Mail, ReceiptText, Search, Settings, ShieldCheck, Sparkles, Target, Users, Wallet,
   WalletCards
@@ -83,7 +83,7 @@ function EmptyPanel({ icon: Icon = WalletCards, title, detail, action, onAction 
   </div>;
 }
 
-function DashboardPage({ onPricing, onSignIn }) {
+function DashboardPage({ onPricing, onSignIn, setPage }) {
   return <div className="guest-page-stack">
     <PageHero eyebrow="Your financial workspace" title="Make the next move with clarity." description="A calm, connected view of the numbers that guide your business. The layout is ready; financial values will stay blank until real account data is available." image={visualImages.dashboard} tag="FINANCE, IN FOCUS" action={<button className="button primary" onClick={onSignIn}>Sign in to your workspace <ArrowRight size={14} /></button>} />
     <div className="guest-metric-grid">
@@ -101,7 +101,7 @@ function DashboardPage({ onPricing, onSignIn }) {
         ["tax", "Tax Reserve", "Separate estimated tax money from spendable cash.", ShieldCheck],
         ["runway", "Runway", "Understand the time your cash can support.", Target],
         ["ai", "AI CFO", "Ask questions grounded in your finance records.", Bot],
-      ].map(([key, label, detail, Icon]) => <button type="button" className="guest-feature-card" key={key} onClick={() => window.dispatchEvent(new CustomEvent("cfo-preview-navigate", { detail: key }))}>
+      ].map(([key, label, detail, Icon]) => <button type="button" className="guest-feature-card" key={key} onClick={() => setPage(key)}>
         <span className="guest-feature-icon"><Icon size={17} /></span><strong>{label}</strong><p>{detail}</p><span className="guest-feature-link">Explore <ArrowUpRight size={13} /></span>
       </button>)}
     </div>
@@ -231,7 +231,7 @@ export default function GuestWorkspace({ page, setPage, onSignIn, onWebsite }) {
   const modules = userNavigation.filter(([key]) => key !== "dashboard");
 
   const pageContent = {
-    dashboard: <DashboardPage onPricing={onPricing} onSignIn={onSignIn}/>,
+    dashboard: <DashboardPage onPricing={onPricing} onSignIn={onSignIn} setPage={navigate}/>,
     transactions: <TransactionsPage onSignIn={onSignIn}/>,
     invoices: <InvoicesPage onSignIn={onSignIn}/>,
     cashflow: <CashFlowPage onPricing={onPricing}/>,
